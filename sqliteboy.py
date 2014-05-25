@@ -4,8 +4,14 @@
 # sqliteboy.py
 # Simple Web SQLite Manager/Form/Report Application
 # (c) Noprianto <nop@tedut.com>
-# 2012-2013
-# GPL
+# 2012-2014
+# License: GPL
+#
+# SQLiteBoy is an independent product, developed separately from the 
+# SQLite core library, which is maintained by SQLite.org.  
+# Neither SQLiteBoy.com nor SQLite.org take any responsibility for the 
+# work of the other.
+#
 #
 # Please read README.rst
 #
@@ -17,43 +23,22 @@
 # - bare except:
 # - PEP8 violations :)
 #
-# # pyinstaller 2.0 spec #
-# # python <path/to/pyinstaller.py> <spec>
-#
-#    a = Analysis(['sqliteboy.py'])
-#
-#    a.datas += [
-#                ('sqliteboy.py', 'sqliteboy.py', 'DATA'),
-#                ('README.rst', 'README.rst', 'DATA'),
-#            ]
-#
-#    pyz = PYZ(a.pure)
-#
-#    exe = EXE(
-#                pyz, 
-#                a.scripts, 
-#                a.binaries, 
-#                a.datas, 
-#                name="sqliteboy.exe",
-#                icon="favicon.ico",
-#                console=True,
-#                debug=False
-#            )
-#
+
 
 #----------------------------------------------------------------------#
 # APPLICATION                                                          #
 #----------------------------------------------------------------------#
 NAME = 'sqliteboy'
 APP_DESC = 'Simple Web SQLite Manager/Form/Report Application'
-VERSION = '0.50'
-WSITE = 'https://github.com/nopri/%s' %(NAME)
+VERSION = '1.50'
+WSITE = 'http://%s.com' %(NAME)
 TITLE = NAME + ' ' + VERSION
 DBN = 'sqlite'
 CHECK_SAME_THREAD=False
 FORM_TBL = '_sqliteboy_'
 FORM_URL_INIT = '/sqliteboy/init'
 FORM_FIELDS = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+FORM_FIELDS_R1 = ['rowid', 'rowtime']
 FORM_FIELD_TYPE = 'text'
 FORM_SPLIT = '.'
 FORM_VALID = None
@@ -67,11 +52,31 @@ DEFAULT_LANG = 'default'
 DEFAULT_TABLE = 'sqlite_master'
 DEFAULT_LIMIT = 50
 DEFAULT_T_BASE = '%s.html' %(NAME)
+DEFAULT_T_BASE_HEADER = '$def with (data, content)'
+DEFAULT_PY_HANDLER = '%s_user' %(NAME)
+DEFAULT_SSL_CERTIFICATE = '%s.cert' %(NAME)
+DEFAULT_SSL_PRIVATE_KEY = '%s.key' %(NAME)
+DEFAULT_PY_FORM = 'form_'
+DEFAULT_PY_REPORT = 'report_'
 DEFAULT_ADMIN_USER = 'admin'
 DEFAULT_ADMIN_PASSWORD = DEFAULT_ADMIN_USER
 DEFAULT_HOSTS_ALLOWED = ['127.0.0.1']
 DEFAULT_TEXTAREA_COLS = 40
 DEFAULT_TEXTAREA_ROWS = 15
+DEFAULT_ERROR_INT = -1
+DEFAULT_ERROR_STR = ''
+DEFAULT_WIN_EXE = '%s.exe' %(NAME)
+DEFAULT_WIN_EXE_VERSION = '%s.version' %(DEFAULT_WIN_EXE)
+DEFAULT_WIN_MD5 = '%s.md5' %(DEFAULT_WIN_EXE)
+DEFAULT_FAVICON = '%s.ico' %(NAME)
+DEFAULT_SPEC = '%s.spec' %(NAME)
+DEFAULT_VERSION = '%s.version' %(NAME)
+DEFAULT_WEBPY_STATIC = ['static']
+DEFAULT_QUERY_EXPORT = 'query.csv'
+DEFAULT_VAR_MAX = 3
+APPLICATION_TITLE_MAX = 32
+BROWSE_LIMIT_ALL = [10, 25, DEFAULT_LIMIT, 100, 250, 500, 1000]
+SEQUENCE_TABLE = 'sqlite_sequence'
 HOST_LOCAL = '0'
 HOST_ALL = '1'
 HOST_CUSTOM = '2'
@@ -96,7 +101,11 @@ SKT_P_EDIT = 'position'
 SKT_M_COLUMN = 'column'
 SKT_M_RENAME = 'rename'
 SKT_M_DROP = 'drop'
+SKT_M_COPY = 'copy'
+SKT_M_EMPTY = 'empty'
+SKT_M_IMPORT = 'import'
 SKQ = 'query'
+SKV = 'vacuum'
 SK_CREATE = 'create'
 SK_LOGIN = 'login'
 SK_PASSWORD = 'password'
@@ -107,6 +116,10 @@ SK_CALCULATOR = 'calculator'
 SK_USERS = 'users'
 SK_HOSTS = 'hosts'
 SK_SYSTEM = 'system'
+SK_SCRIPTS = 'scripts'
+SK_SCRIPT = 'script'
+SK_PROFILE = 'profile'
+SK_SCHEMA = 'schema'
 SKF_CREATE = 'form.create'
 SKF_RUN = 'form.run'
 SKR_CREATE = 'report.create'
@@ -122,6 +135,15 @@ COLUMN_TYPES = (
                 ('blob', 1),
                 ('null', 1),
             ) #type, used in add column
+COLUMN_CONVERT = {
+                    'integer': 'sqliteboy_as_integer',
+                    'real': 'sqliteboy_as_float',
+                    'char': 'sqliteboy_strs',
+                    'varchar': 'sqliteboy_strs',
+                    'text': 'sqliteboy_strs',
+                    'blob': 'sqliteboy_strs',
+                }
+COLUMN_CONVERT_DEFAULT = 'sqliteboy_strs'
 MAX_COLUMN_ADD = 3
 CUSTOM_RT = {
                 'query': 4,
@@ -149,7 +171,11 @@ FORM_KEY_DATA_ONSAVE = 'onsave'
 FORM_KEY_SUB = 'sub'
 FORM_KEY_MESSAGE = 'message'
 FORM_KEY_SQL2 = 'sql2'
+FORM_KEY_SQL0 = 'sql0'
+FORM_KEY_INSERT = 'insert'
+FORM_KEY_CONFIRM = 'confirm'
 FORM_REQ = (FORM_KEY_DATA,)
+FORM_REQ_X = (2,) #parsed index
 FORM_REQ_DATA = (FORM_KEY_DATA_TABLE, 
                     FORM_KEY_DATA_COLUMN,
                 )
@@ -159,7 +185,10 @@ FORM_ONSAVE_SQL_VALUE = 'value'
 FORM_ONSAVE_SQL_RET = 'onsave'
 FORM_SUB_ROWS_DEFAULT = [5, 1]#rows, required rows
 FORM_MESSAGE_LEN = 3
-FORM_MESSAGE_VAR_RESULT = '$result'
+FORM_MESSAGE_VAR_RESULT = 'result'
+FORM_MESSAGE_VAR_PYTHON_HANDLER = 'python_handler'
+FORM_INSERT_DEFAULT = 1
+FORM_DEFAULT_SQL_RET = 'a' 
 #
 REPORT_KEY_DATA_TYPES = ['integer']
 REPORT_ALL = FORM_ALL
@@ -174,31 +203,84 @@ REPORT_KEY_DATA_REQUIRED = FORM_KEY_DATA_REQUIRED
 REPORT_KEY_DATA_READONLY = FORM_KEY_DATA_READONLY
 REPORT_KEY_DATA_CONSTRAINT = FORM_KEY_DATA_CONSTRAINT
 REPORT_KEY_DATA_TYPE = 'type'
+REPORT_KEY_ALIGN = 'align'
 REPORT_KEY_MESSAGE = 'message'
 REPORT_KEY_SECURITY = FORM_KEY_SECURITY
 REPORT_KEY_SECURITY_RUN = FORM_KEY_SECURITY_RUN
 REPORT_KEY_SQL = 'sql'
 REPORT_KEY_HEADER = 'header'
+REPORT_KEY_HEADERS = 'headers'
+REPORT_KEY_FOOTERS = 'footers'
+REPORT_KEY_PAPER = 'paper'
+REPORT_KEY_MARGINS = 'margins'
+REPORT_KEY_CONFIRM = 'confirm'
 REPORT_REQ = (REPORT_KEY_DATA,
                 REPORT_KEY_SQL,
             )
+REPORT_REQ_X = (3,) #parsed index
 REPORT_REQ_DATA = (REPORT_KEY_DATA_KEY,)
 REPORT_REFERENCE_SQL_0 = 'a'
 REPORT_REFERENCE_SQL_1 = 'b'
 REPORT_MESSAGE_LEN = 3
-REPORT_MESSAGE_VAR_RESULT = '$result'
+REPORT_MESSAGE_VAR_RESULT = 'result'
+REPORT_HEADERS_CELL_LEN = 3
+REPORT_FOOTERS_CELL_LEN = 3
+REPORT_HEADERS_CELL_TYPES = [
+                                (str, unicode, ), 
+                                (str, unicode, int, ),
+                                (dict, ),
+                            ]
+REPORT_FOOTERS_CELL_TYPES = REPORT_HEADERS_CELL_TYPES
+REPORT_CELL_TYPE_TEXT = ''
+REPORT_CELL_TYPE_FILES_IMAGE = 'files.image'
+REPORT_CELL_TYPE_SQL = 'sql'
+REPORT_CELL_TYPE_SQL_RESULT = REPORT_REFERENCE_SQL_0
+REPORT_RESULT_ROW_COUNT = 'result_row_count'
+REPORT_RESULT_MESSAGE = 'result_message'
+REPORT_FORMAT_DEFAULT = ''
+REPORT_FORMAT_CSV = 'csv'
+REPORT_FORMAT_PDF = 'pdf'
+REPORT_FORMAT_ALL = [
+                        REPORT_FORMAT_DEFAULT,
+                        REPORT_FORMAT_CSV,
+                        REPORT_FORMAT_PDF,
+                    ]
+REPORT_ALIGN_ALL = [
+                        0, #left
+                        1, #center
+                        2, #right
+                        3, #justify
+                    ]
+REPORT_ALIGN_DEFAULT = 0
+REFERENCE_FLAG_PASSWORD = 2
 FAVICON_WIDTH = 16
 FAVICON_HEIGHT = 16
 PYTIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+PYTIME_DATE_FORMAT = '%Y-%m-%d'
+PYTIME_TIME_FORMAT = '%H:%M:%S'
 PYTIME_FORMAT_BACKUP = '%Y-%m-%d_%H-%M-%S'
 REGEX_EMAIL = r'^[\w\.\+-]+@[\w\.-]+\.[a-zA-Z]+$'
 DAYS_IN_YEAR = 365.2425
+DAYS_IN_MONTH_AVERAGE = round( (DAYS_IN_YEAR / float(12)), 2)
+DAYS_IN_MONTH_30 = 30
+DAYS_IN_MONTH_31 = 31
 CSV_SUFFIX = '.csv'
 CSV_CTYPE = 'text/csv'
 BACKUP_BUFFER = 10 * SIZE_KB
 FILES_MAX_NUMBER = 10
 FILES_MAX_SIZE = 1 * SIZE_MB
+SCRIPTS_MAX_SIZE = 32 * SIZE_KB
+SYSTEM_CONFIG_MAXSPLIT = 3
 SYSTEM_CONFIG = (
+                    (
+                        'x_application',
+                        'x_application_title',
+                        'application.title.',
+                        'application.title..%s' %(''),
+                        '',
+                        'striphtml',
+                        0,
+                    ),                    
                     (
                         'x_files',
                         'x_max_files_number',
@@ -206,6 +288,7 @@ SYSTEM_CONFIG = (
                         'files.max_number..%s' %(FILES_MAX_NUMBER),
                         FILES_MAX_NUMBER,
                         int,
+                        0,
                     ),
                     (
                         'x_files',
@@ -214,7 +297,35 @@ SYSTEM_CONFIG = (
                         'files.max_size..%s' %(FILES_MAX_SIZE),
                         FILES_MAX_SIZE,
                         int,
+                        0,
                     ),
+                    (
+                        'x_scripts',
+                        'x_max_script_size',
+                        'scripts.max_size.',
+                        'scripts.max_size..%s' %(SCRIPTS_MAX_SIZE),
+                        SCRIPTS_MAX_SIZE,
+                        int,
+                        0,
+                    ),
+                    (
+                        'x_users',
+                        'x_user_defined_profile',
+                        'users.profile.',
+                        'users.profile..%s' %(''),
+                        '',
+                        str,
+                        1,
+                    ),
+                    (
+                        'x_messages',
+                        'x_messages_all',
+                        'messages.all.',
+                        'messages.all..%s' %(''),
+                        '',
+                        'striphtml',
+                        1,
+                    ),                    
                 )
 NOTFOUND_CHECK = [
                     '/fs',
@@ -248,6 +359,459 @@ REGEX_PAGE = (
 SAMPLE_PAGE = ', '.join([x[3] for x in REGEX_PAGE])
 CALCULATOR_MAX_INPUT = 36
 CALCULATOR_ALLOWED = ''
+PLAIN_CTYPE = 'text/plain'
+SCRIPT_KEY_NAME = 'name'
+SCRIPT_KEY_INFO = 'info'
+SCRIPT_KEY_AUTHOR = 'author'
+SCRIPT_KEY_LICENSE = 'license'
+SCRIPT_KEY_TABLES = 'tables'
+SCRIPT_KEY_FORMS = 'forms'
+SCRIPT_KEY_REPORTS = 'reports'
+SCRIPT_KEY_PROFILES = 'profiles'
+SCRIPT_REQ = (
+                SCRIPT_KEY_NAME,
+                SCRIPT_KEY_TABLES,
+                SCRIPT_KEY_FORMS,
+                SCRIPT_KEY_REPORTS,
+            )
+SCRIPT_TABLE_COLUMN_LEN = 3
+SCRIPT_TABLE_ERROR = -1
+SCRIPT_TABLE_COLUMN_CONFLICT = -2
+SCRIPT_TABLE_OK = 0
+SCRIPT_TABLE_EXISTS = 1
+SCRIPT_FORM_ERROR = -1
+SCRIPT_FORM_OK = 0
+SCRIPT_FORM_EXISTS = -2
+SCRIPT_REPORT_ERROR = -1
+SCRIPT_REPORT_OK = 0
+SCRIPT_REPORT_EXISTS = -2
+SCRIPT_VALID_COLUMN_FLAG = (
+                            ([], 0, ''), #none
+                            ([], 1, ''), #primary key
+                            (['integer'], 2, 'primary key autoincrement'), 
+                        )
+JSON_INDENT = 4
+COPY_TARGET_EXCLUDE = [
+                    FORM_TBL,
+                    DEFAULT_TABLE,
+                    SEQUENCE_TABLE,
+            ]
+EMPTY_EXCLUDE = [
+                    FORM_TBL,
+                    DEFAULT_TABLE,
+                    SEQUENCE_TABLE,
+            ]            
+IMPORT_EXCLUDE = [
+                    FORM_TBL,
+                    DEFAULT_TABLE,
+                    SEQUENCE_TABLE,
+            ]            
+PRAGMA_FREELIST_COUNT = 'freelist_count'
+SERVER_COMMAND_SEPARATOR = '-'
+SERVER_COMMAND_ALL = {
+                        'generate_favicon': 'scmd_favicon',
+                        'generate_pyinstaller': 'scmd_pyinstaller',
+                        'generate_build': 'scmd_build',    
+                        'generate_version': 'scmd_version',    
+                    }
+SHORTCUT_TYPE_FORM = 'form'
+SHORTCUT_TYPE_REPORT = 'report'
+SHORTCUT_ALL = [
+                    SHORTCUT_TYPE_FORM,
+                    SHORTCUT_TYPE_REPORT,
+                ]
+PRINT_DATA_KEY = 'output_printer'
+PRINT_DATA_VALUE = 1
+IMPORT_ERROR_CODE = 255
+GENERAL_ERROR_CODE = 254
+
+PYINSTALLER_SPEC = '''
+# $title $command
+# $datetime
+
+a = Analysis([r'$source_path'])
+
+a.datas += [
+            ('$source', r'$source_path', 'DATA'),
+            ('$readme', r'$readme_path', 'DATA'),
+        ]
+
+pyz = PYZ(a.pure)
+
+exe = EXE(
+            pyz, 
+            a.scripts, 
+            a.binaries, 
+            a.datas, 
+            name=r'$output',
+            icon=r'$icon',
+            console=True,
+            debug=False
+        )
+
+#
+import sys
+import os 
+try: 
+   from hashlib import md5
+except ImportError:
+   from md5 import md5
+
+#
+content_version = """
+$title $command
+$datetime
+"""
+file_version = open(r'$output_version', 'w')
+file_version.write(content_version)
+file_version.close()
+
+#
+content = open(r'$output', 'rb').read()
+content_md5 = md5(content).hexdigest()
+content_lines = [
+            '%s  %s' %(content_md5, r'$output'),
+        ]
+file_md5 = open(r'$output_md5', 'w')
+for i in content_lines:
+    line = '%s' %(i)
+    file_md5.write(line)
+file_md5.close()
+
+#
+try:
+    content_check = open(r'$output_md5', 'r').readlines()
+    content_check = [x.strip() for x in content_check if not x.startswith('#')]
+    content_check = [x for x in content_check if x]
+    content_check_md5 = content_check[0].split()[0].strip()
+    if content_check_md5 == content_md5:
+        sys.stdout.write('OK' + os.linesep)
+except:
+    pass
+    
+
+'''
+
+VERSION_SPEC = '''
+$title $command
+$datetime
+'''
+
+PROFILE_STYLE_ADD_ALIGN = '''
+                                .pre
+                                {
+                                    white-space     : pre-wrap;
+                                    white-space     : -moz-pre-wrap;
+                                    word-wrap       : break-word;
+                                }                                
+                                .left
+                                {
+                                    text-align      : left;
+                                }                                
+                                .center
+                                {
+                                    text-align      : center;
+                                }                           
+                                .right
+                                {
+                                    text-align      : right;
+                                }                          
+                                .justify
+                                {
+                                    text-align      : justify;
+                                }                                                                                                           
+                    '''
+PROFILE_STYLE_PRINT = '''
+                                *
+                                {
+                                    font-family     : Courier;
+                                    font-size       : 12pt;
+                                }
+                                table
+                                {
+                                    border-collapse : collapse;
+                                    width           : 100%;
+                                }
+                                td
+                                {
+                                    border          : 1px solid #000000;
+                                    padding         : 2px;
+                                }
+                                th
+                                {
+                                    border          : 1px solid #000000;
+                                    padding         : 2px;
+                                }
+                                select
+                                {
+                                    width           : 95%;
+                                }
+                                .main_menu
+                                {
+                                    display         : none;
+                                }                                
+                                .messages
+                                {
+                                    display         : none;
+                                }
+                    ''' + PROFILE_STYLE_ADD_ALIGN
+PROFILE_ITEM_STYLE = [
+                        [
+                            PROFILE_STYLE_PRINT,
+                            '''
+                                *
+                                {
+                                    font-family     : Courier;
+                                    font-size       : 12pt;
+                                }
+                                table
+                                {
+                                    border-collapse : collapse;
+                                    width           : 100%;
+                                }
+                                td
+                                {
+                                    border          : 1px solid #808080;
+                                    padding         : 2px;
+                                }
+                                th
+                                {
+                                    background-color: #406080;
+                                    border          : 1px solid #808080;
+                                    padding         : 2px;
+                                    color           : #ffffff;
+                                }
+                                th a
+                                {
+                                    color           : #ffffff;
+                                    text-decoration : none;
+                                }
+                                tr:nth-child(odd)
+                                {
+                                    background-color: #cccccc;
+                                }
+                                tr:nth-child(even)
+                                {
+                                    background-color: #ffffff;
+                                }
+                                select
+                                {
+                                    width           : 95%;
+                                }
+                                .main_menu
+                                {
+                                }                            
+                                a
+                                {
+                                    color           : #406080;                                
+                                }
+                                .messages
+                                {
+                                    padding         : 2px;
+                                    background-color: #cccccc;
+                                    border          : 1px solid #808080;
+                                }                                
+                                table:not(.nohover) tr:hover
+                                {
+                                    background-color: #ffffe0;
+                                }
+                            ''' + PROFILE_STYLE_ADD_ALIGN
+                        ],
+                        [
+                            PROFILE_STYLE_PRINT,
+                            '''
+                                *
+                                {
+                                    font-family     : Courier;
+                                    font-size       : 12pt;
+                                }
+                                table
+                                {
+                                    border-collapse : collapse;
+                                    width           : 100%;
+                                }
+                                td
+                                {
+                                    border          : 1px solid #ffcc66;
+                                    padding         : 2px;
+                                }
+                                th
+                                {
+                                    background-color: #996600;
+                                    border          : 1px solid #ffcc66;
+                                    padding         : 2px;
+                                    color           : #ffffff;
+                                }
+                                th a
+                                {
+                                    color           : #ffffff;
+                                    text-decoration : none;
+                                }
+                                tr:nth-child(odd)
+                                {
+                                    background-color: #f3e3c3;
+                                }
+                                tr:nth-child(even)
+                                {
+                                    background-color: #ffffff;
+                                }
+                                select
+                                {
+                                    width           : 95%;
+                                }
+                                .main_menu
+                                {
+                                }                            
+                                input, select, textarea
+                                {
+                                    background-color: #ffffff;
+                                    color           : #996600;
+                                    border          : 1px solid #ffcc66;
+                                    margin          : 2px;
+                                }
+                                a
+                                {
+                                    color           : #996600;                                
+                                }
+                                .messages
+                                {
+                                    padding         : 2px;
+                                    background-color: #f3e3c3;
+                                    border          : 1px solid #ffcc66;
+                                }                                
+                                table:not(.nohover) tr:hover
+                                {
+                                    background-color: #ffffe0;
+                                }
+                            ''' + PROFILE_STYLE_ADD_ALIGN
+                        ],
+                        [
+                            PROFILE_STYLE_PRINT,
+                            '''
+                                *
+                                {
+                                    font-family     : Courier;
+                                    font-size       : 12pt;
+                                }
+                                table
+                                {
+                                    border-collapse : collapse;
+                                    width           : 100%;
+                                }
+                                td
+                                {
+                                    border          : 1px solid #4169e1;
+                                    padding         : 2px;
+                                }
+                                th
+                                {
+                                    background-color: #00008b;
+                                    border          : 1px solid #4169e1;
+                                    padding         : 2px;
+                                    color           : #ffffff;
+                                }
+                                th a
+                                {
+                                    color           : #ffffff;
+                                    text-decoration : none;
+                                }
+                                tr:nth-child(odd)
+                                {
+                                    background-color: #b0e0e6;
+                                }
+                                tr:nth-child(even)
+                                {
+                                    background-color: #ffffff;
+                                }
+                                select
+                                {
+                                    width           : 95%;
+                                }
+                                .main_menu
+                                {
+                                }                            
+                                a
+                                {
+                                    color           : #00008b;                                
+                                }
+                                .messages
+                                {
+                                    padding         : 2px;
+                                    background-color: #b0e0e6;
+                                    border          : 1px solid #4169e1;
+                                }                                
+                                table:not(.nohover) tr:hover
+                                {
+                                    background-color: #ffffe0;
+                                }
+                            ''' + PROFILE_STYLE_ADD_ALIGN
+                        ],
+                    ]
+PROFILE_ALL = [
+                [
+                    'style',
+                    'x_style',
+                    [
+                        [0, 'A'],
+                        [1, 'B'],
+                        [2, 'C'],
+                    ],
+                    2,
+                    'pr_style',
+                    int,
+                    0,
+                ],
+                [
+                    'first_name',
+                    'x_first_name',
+                    [
+                    ],
+                    '',
+                    'pr_user',
+                    str,
+                    0,
+                ],
+                [
+                    'last_name',
+                    'x_last_name',
+                    [
+                    ],
+                    '',
+                    'pr_user',
+                    str,
+                    0,
+                ],
+                [
+                    'email',
+                    'x_email',
+                    [
+                    ],
+                    '',
+                    'pr_user',
+                    str,
+                    0,
+                ],                
+                [
+                    'website',
+                    'x_website',
+                    [
+                    ],
+                    '',
+                    'pr_user',
+                    str,
+                    0,
+                ],                
+            ]
+PROFILE_USER_DEFINED_LEN = 4
+PROFILE_USER_DEFINED_HANDLER = 'pr_user'
+PROFILE_USER_DEFINED_TYPE = str
+PROFILE_USER_DEFINED_LEVEL = 1
+ENV_VAR_MAX = DEFAULT_VAR_MAX
+QUERY_STRING_MAX = 1 * SIZE_KB
+PDF_CTYPE = 'application/pdf'
+PDF_SUFFIX = '.pdf'
+RANDOM_SIMPLE_MIN = 10
+RANDOM_SIMPLE_MAX = 100
 
 
 #----------------------------------------------------------------------#
@@ -258,9 +822,18 @@ import os
 if getattr(sys, 'frozen', None):
     CURDIR = sys._MEIPASS
     CWDIR = os.getcwd()
+    SCURDIR = CWDIR
 else:
     CURDIR = os.path.dirname(__file__)
     CWDIR = CURDIR
+    SCURDIR = os.getcwd()
+
+for i in [CWDIR, SCURDIR]:
+    if not i in sys.path:
+        sys.path.append(i)
+
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
 
 import time
 import decimal
@@ -271,33 +844,129 @@ FORM_VALID.append('_')
 CALCULATOR_ALLOWED = string.digits + '.-+*/()'
 
 import socket
-DEFAULT_HOSTS_ALLOWED.append(socket.gethostbyname(socket.gethostname()))
+try:
+    DEFAULT_HOSTS_ALLOWED.append(socket.gethostbyname(socket.gethostname()))
+except:
+    pass
 
 try: 
    from hashlib import md5
 except ImportError:
    from md5 import md5
 
-import json
 import urllib
 import hashlib
 import base64
 
 import platform
 import struct
-import sqlite3
 
 import re
 
 import csv
-import cStringIO
+
+try:
+    import cStringIO
+except ImportError:
+    import StringIO as cStringIO
 
 from HTMLParser import HTMLParser
 
 import calendar
 
-import web
-web.config.debug = False
+import copy
+
+import traceback
+
+
+try:
+    import reportlab
+    from reportlab.lib.enums import TA_LEFT as PDF_TA_LEFT
+    from reportlab.lib.enums import TA_CENTER as PDF_TA_CENTER
+    from reportlab.lib.enums import TA_RIGHT as PDF_TA_RIGHT
+    from reportlab.lib.enums import TA_JUSTIFY as PDF_TA_JUSTIFY
+    from reportlab.lib.colors import black as PDF_DEFAULT_BORDER_COLOR
+    from reportlab.lib.styles import getSampleStyleSheet as PDF_STYLE_SHEET
+    from reportlab.platypus import SimpleDocTemplate as PDF_TEMPLATE
+    from reportlab.platypus import Table as PDF_TABLE
+    from reportlab.platypus import Image as PDF_IMAGE
+    from reportlab.platypus import Spacer as PDF_SPACER
+    from reportlab.platypus import Paragraph as PDF_PARAGRAPH
+    from reportlab.lib.pagesizes import A4 as PDF_DEFAULT_PAGE_SIZE
+    from reportlab.lib.units import inch as PDF_UNIT_INCH
+    #
+    PDF_DEFAULT_BORDER_STYLE = [
+                                    (
+                                        'GRID', 
+                                        (0, 0), 
+                                        (-1, -1), 
+                                        1, 
+                                        PDF_DEFAULT_BORDER_COLOR,
+                                    ),
+                                ]
+    PDF_DEFAULT_SPACER_WIDTH = 1
+    PDF_DEFAULT_SPACER_HEIGHT = 36
+    PDF_DEFAULT_PARAGRAPH_STYLE = PDF_STYLE_SHEET()['BodyText']
+except ImportError:
+    reportlab = None
+
+if reportlab:
+    try:
+        from reportlab.pdfbase import _fontdata_enc_winansi
+        from reportlab.pdfbase import _fontdata_enc_macroman
+        from reportlab.pdfbase import _fontdata_enc_standard
+        from reportlab.pdfbase import _fontdata_enc_symbol
+        from reportlab.pdfbase import _fontdata_enc_zapfdingbats
+        from reportlab.pdfbase import _fontdata_enc_pdfdoc
+        from reportlab.pdfbase import _fontdata_enc_macexpert
+        from reportlab.pdfbase import _fontdata_widths_courier
+        from reportlab.pdfbase import _fontdata_widths_courierbold
+        from reportlab.pdfbase import _fontdata_widths_courieroblique
+        from reportlab.pdfbase import _fontdata_widths_courierboldoblique
+        from reportlab.pdfbase import _fontdata_widths_helvetica
+        from reportlab.pdfbase import _fontdata_widths_helveticabold
+        from reportlab.pdfbase import _fontdata_widths_helveticaoblique
+        from reportlab.pdfbase import _fontdata_widths_helveticaboldoblique
+        from reportlab.pdfbase import _fontdata_widths_timesroman
+        from reportlab.pdfbase import _fontdata_widths_timesbold
+        from reportlab.pdfbase import _fontdata_widths_timesitalic
+        from reportlab.pdfbase import _fontdata_widths_timesbolditalic
+        from reportlab.pdfbase import _fontdata_widths_symbol
+        from reportlab.pdfbase import _fontdata_widths_zapfdingbats        
+    except:
+        pass
+
+try:
+    import sqlite3    
+    
+    import json
+
+    import web
+    web.config.debug = False
+
+    ssl_cert = os.path.join(SCURDIR, DEFAULT_SSL_CERTIFICATE)
+    ssl_pkey = os.path.join(SCURDIR, DEFAULT_SSL_PRIVATE_KEY)
+    ssl_cert = os.path.abspath(ssl_cert)
+    ssl_pkey = os.path.abspath(ssl_pkey)
+    if os.path.exists(ssl_cert) and os.path.exists(ssl_pkey):
+        import OpenSSL
+        from web.wsgiserver import CherryPyWSGIServer
+        CherryPyWSGIServer.ssl_certificate = ssl_cert
+        CherryPyWSGIServer.ssl_private_key = ssl_pkey    
+    
+except Exception, e:
+    lsep = os.linesep
+    emsg = '%s%s%s%s%s%s%s' %(
+                TITLE,
+                lsep,
+                APP_DESC,
+                lsep,
+                lsep,
+                str(e),
+                lsep
+            )
+    sys.stderr.write(emsg)
+    sys.exit(IMPORT_ERROR_CODE)
 
 
 #----------------------------------------------------------------------#
@@ -310,10 +979,15 @@ URLS = (
     '/table/browse/(.*)', 'table_browse',
     '/table/column', 'table_column',
     '/table/rename', 'table_rename',
+    '/table/empty', 'table_empty',
     '/table/drop', 'table_drop',
-    '/table/csv', 'table_csv',
+    '/table/export/csv', 'table_export_csv',
+    '/table/import/csv', 'table_import_csv',
+    '/table/schema', 'table_schema',
+    '/table/copy', 'table_copy',
     '/table/create', 'table_create',
     '/query', 'query',
+    '/vacuum', 'vacuum',
     '/table/row/(.*)', 'table_row',
     '/table/blob/(.*)', 'table_blob',
     '/table/save', 'table_save',
@@ -329,9 +1003,11 @@ URLS = (
     '/admin/backup', 'admin_backup',
     '/form/action', 'form_action',
     '/form/run/(.*)', 'form_run',
+    '/form/shortcut/(.*)', 'form_shortcut',
     '/form/edit', 'form_edit',
     '/report/action', 'report_action',
     '/report/run/(.*)', 'report_run',
+    '/report/shortcut/(.*)', 'report_shortcut',
     '/report/edit', 'report_edit',
     '/notes', 'notes',
     '/files', 'files',
@@ -339,6 +1015,9 @@ URLS = (
     '/pages', 'pages',
     '/page/(.*)', 'page',
     '/calculator', 'calculator',
+    '/admin/scripts', 'admin_scripts',
+    '/admin/script/(.*)', 'admin_script',
+    '/profile', 'profile',
     )
 
 app = None
@@ -356,10 +1035,24 @@ rowid = '_%s___%s___%s___%s_' %(
 #
 sess = None
 sess_init = {
+        'var': {},
         'table': {},
         'user': '',
         'admin': 0,
     }
+#
+style_align_default = {
+                        0: ' class="left"',
+                        1: ' class="center"',
+                        2: ' class="right"',
+                        3: ' class="justify"',
+                    }
+style_align_pdf = {
+                        0: PDF_TA_LEFT,
+                        1: PDF_TA_CENTER,
+                        2: PDF_TA_RIGHT,
+                        3: PDF_TA_JUSTIFY,
+                    }
 
 
 #----------------------------------------------------------------------#
@@ -381,6 +1074,9 @@ class MemSession(web.session.Store):
     data = {}
     def __init__(self):
         self.data = {}
+    
+    def __len__(self):
+        return len(self.data.keys())
     
     def __contains__(self, key):
         return self.data.has_key(key)
@@ -417,6 +1113,577 @@ class MemSession(web.session.Store):
         
 
 #----------------------------------------------------------------------#
+# NUMBER TO WORDS                                                      #
+#----------------------------------------------------------------------#
+NUMBER_TO_WORDS = {}
+
+class NumberToWords:
+    def __init__(self):
+        self.word = {}
+        self.name1 = {}
+        self.name2 = {}
+        self.sign = {}
+        self.replace = {}
+        self.style = {}
+        self.data = {}
+        #
+        self.chunk_size = 3
+        
+    def maxlength(self):
+        ret = 0
+        #
+        ln1 = len(self.name1.keys())
+        #
+        if ln1:
+            ret = ( ( 2 * ln1 ) - 1) * self.chunk_size
+        #
+        return ret
+        
+    def separator(self):
+        return self.style.get('separator', ' ')
+        
+    def decimal_separator(self):
+        return self.style.get('decimal_separator', ' ')
+    
+    def is_number(self, s, check_length=True):
+        s = str(s)
+        #
+        ret = False
+        #
+        if check_length:
+            if len(s) > self.maxlength():
+                return False
+        #
+        try:
+            test = float(s)
+            ret = True
+        except:
+            pass
+        #
+        return ret
+    
+    def is_negative(self, s):
+        ret = False
+        #
+        try:
+            test = float(s)
+            if test < 0:
+                ret = True
+        except:
+            pass
+        #
+        return ret
+        
+    def split(self, s):
+        s = str(s).lower()
+        #
+        ret = ()
+        #
+        if not self.is_number(s, False):
+            return ret
+        #
+        if 'e' in s:
+            return ret
+        #    
+        P1 = ''
+        P2 = ''
+        if '.' in s:
+            P1, P2 = s.split('.')
+        else:
+            P1 = s
+        P1 = P1.strip()
+        P2 = P2.strip()
+        #
+        P1 = P1.replace('+', '')
+        P1 = P1.replace('-', '')
+        #
+        if not self.is_number(P1):
+            return ret
+        #
+        ret = (P1, P2)
+        return ret
+
+    def chunk(self, s):
+        s = str(s)
+        #
+        n = self.chunk_size
+        #
+        mod = len(s) % n
+        if mod:
+            ln = len(s) + (n - mod)
+            s = s.rjust(ln, ' ')
+        #
+        ret = [s[i:i+n] for i in range(0, len(s), n)]
+        ret = [s.strip() for s in ret]
+        #
+        return ret
+
+    def get_single(self, s):
+        s = str(s)
+        #
+        res = []
+        #
+        for i in s:
+            x = self.word.get(i, '')
+            if x and i == '0':
+                x = x[0]
+            res.append(x)
+        #
+        ret = self.separator().join(res)
+        return ret
+    
+    def get_1d(self, s):
+        s = str(s)
+        #
+        ret = ''
+        #
+        if not len(s) == 1: 
+            return ret
+        #
+        r = self.word.get(s, '')
+        if r and s == '0':
+            r = r[1]
+        #
+        ret = r
+        return ret    
+
+    def get_2d(self, s):
+        '''
+        override this
+        '''
+        s = str(s)
+        #        
+        ret = ''
+        #
+        if not len(s) == 2: 
+            return ret
+        #
+        return ret    
+
+    def get_3d(self, s):
+        '''
+        override this
+        '''        
+        s = str(s)
+        #        
+        ret = ''
+        #
+        if not len(s) == 3: 
+            return ret
+        #
+        return ret    
+
+    def get_d(self, s):
+        s = str(s)
+        #        
+        ls = len(s)
+        #
+        ret = ''
+        #
+        if ls == 1:
+            ret = self.get_1d(s)
+        elif ls == 2:
+            ret = self.get_2d(s)
+        elif ls == 3:
+            ret = self.get_3d(s)
+        #
+        return ret        
+        
+    def get_x1(self, c, s, separator):
+        '''
+        override this if needed
+        '''        
+        s = str(s)
+        separator = str(separator)
+        #
+        ret = (s, separator)
+        return ret
+        
+    def get_p1(self, p):
+        p = str(p)
+        #
+        nk = self.name1.keys()
+        mx = max(nk)
+        mxt = ''
+        if self.is_number(p) and long(p) > 0:
+            mxt = self.name1.get(mx, '')
+        #
+        lp1 = self.chunk(p)
+        if len(lp1) > mx:
+            ret = [
+                        lp1[:-mx],
+                        mxt,
+                        lp1[-mx:],
+                    ]
+        else:
+            ret = [ 
+                        lp1, 
+                    ]
+        #
+        return ret
+    
+    def words_p1(self, p):
+        ret = []
+        #
+        if not isinstance(p, list):
+            p = []
+        #
+        p = reversed(p)
+        for rp in p:
+            if isinstance(rp, str):
+                ret.append(rp)
+                continue
+            #
+            rp = reversed(rp)
+            c = 0
+            for i in rp:
+                rsep = self.separator()
+                #
+                r = self.get_d(i).strip()
+                r, rsep = self.get_x1(c, r, rsep)
+                #
+                x = self.name1.get(c, '')
+                if not int(i) == 0:
+                    if not r or not x:
+                        rsep = ''
+                    z = rsep.join([r, x])
+                    ret.append(z)
+                c += 1
+        #
+        return ret
+        
+    def words_p2(self, p):
+        p = str(p)
+        #
+        return self.get_single(p)
+        
+    def get_words(self, s):
+        ret = ''
+        #
+        neg = self.is_negative(s)
+        #
+        parts = self.split(s)
+        if not parts and len(parts) != 2:
+            return ret
+        #
+        p1 = parts[0]
+        p2 = parts[1]
+        #
+        c1 = self.get_p1(p1)
+        w1 = self.words_p1(c1)
+        w2 = self.words_p2(p2)
+        #
+        r1 = reversed(w1)
+        ss = self.sign.get(neg, '')
+        sr = self.separator().join(r1)
+        if not sr.strip():
+            sr = self.get_single('0')
+        #
+        z1 = self.separator().join([ss, sr])
+        z1 = z1.strip()
+        #
+        if w2:
+            ret = self.decimal_separator().join([z1, w2])
+        else:
+            ret = z1
+        #
+        return ret
+
+
+class NumberToWordsId(NumberToWords):
+    def __init__(self):
+        NumberToWords.__init__(self)
+        #
+        self.word = {
+                        '0': ('nol', ''),
+                        '1': 'satu',
+                        '2': 'dua',
+                        '3': 'tiga',
+                        '4': 'empat',
+                        '5': 'lima',
+                        '6': 'enam',
+                        '7': 'tujuh',
+                        '8': 'delapan',
+                        '9': 'sembilan',
+                        '10': 'sepuluh',
+                        '11': 'sebelas',
+                    }
+        #
+        self.name1 = {
+                        0: '',
+                        1: 'ribu',
+                        2: 'juta',
+                        3: 'milyar',
+                        4: 'triliun',        
+                    }
+        #
+        self.name2 = {
+                        1: '',
+                        2: ('belas', 'puluh'),
+                        3: ('ratus', 'seratus'),        
+                    }
+        #
+        self.sign = {
+                        True: 'min',
+                        False: '',        
+                    }
+        #
+        self.replace = {
+                        1: ('satu', 'se'),
+                    }
+        #
+        self.style = {
+                        'separator': ' ', 
+                        'decimal_separator': ' koma ',
+                    }
+        #
+
+    def get_2d(self, s):
+        s = str(s)
+        #
+        ret = ''
+        if not len(s) == 2: 
+            return ret
+        #
+        res = []
+        rn = ''
+        r = self.word.get(s, '')
+        #
+        if r:
+            res = [r]
+        else:
+            res2 = []
+            rx = self.name2.get(2, ())
+            if s[0] == '1':
+                rn = rx[0]
+                r = self.get_1d(s[1])
+                res2 = [r, '']
+            elif s[0] == '0':
+                rn = ''
+                r = self.get_1d(s[1])
+                res2 = [r, '']
+            else:
+                rn = rx[1]
+                for i in s:
+                    r = self.get_1d(i)
+                    res2.append(r)
+            res = []
+            res.append(res2[0])
+            res.append(rn)
+            res.append(res2[1])
+        #
+        ret = self.separator().join(res)
+        return ret
+
+    def get_3d(self, s):
+        s = str(s)
+        #
+        ret = ''
+        if not len(s) == 3: 
+            return ret
+        #
+        res = []
+        rn = ''
+        r = self.word.get(s, '')
+        #
+        if r:
+            res = [r]
+        else:
+            res2 = []
+            rx = self.name2.get(3, ())
+            if s[0] == '1':
+                rn = rx[1]
+                r = self.get_2d(s[1:])
+                res2 = [rn , r]
+            elif s[0] == '0':
+                rn = ''
+                r = self.get_2d(s[1:])
+                res2 = [r, rn]
+            else:
+                rn = rx[0]
+                r1 = self.get_1d(s[0])
+                r2 = self.get_2d(s[1:])
+                res2 = [r1, rn, r2]
+            res = [self.separator().join(res2)]
+        #
+        ret = self.separator().join(res)
+        return ret
+        
+    def get_x1(self, c, s, separator):
+        for k in self.replace.keys():
+            if c == k:
+                xk = self.replace.get(k)
+                if s == xk[0]:
+                    s = xk[1]
+                    separator = ''
+                    break
+        #
+        return [s, separator]
+
+
+class NumberToWordsEn1(NumberToWords):
+    def __init__(self):
+        NumberToWords.__init__(self)
+        #
+        self.word = {
+                        '0': ('zero', ''),
+                        '1': 'one',
+                        '2': 'two',
+                        '3': 'three',
+                        '4': 'four',
+                        '5': 'five',
+                        '6': 'six',
+                        '7': 'seven',
+                        '8': 'eight',
+                        '9': 'nine',
+                        '10': 'ten',
+                        '11': 'eleven',
+                        '12': 'twelve',
+                        '13': 'thirteen',
+                        '15': 'fifteen',
+                        '18': 'eighteen',
+                        '20': 'twenty',
+                        '30': 'thirty',
+                        '40': 'forty',
+                        '50': 'fifty',
+                        '60': 'sixty',
+                        '70': 'seventy',
+                        '80': 'eighty',
+                        '90': 'ninety',
+                    }
+        #
+        self.name1 = {
+                        0: '',
+                        1: 'thousand',
+                        2: 'million',
+                        3: 'billion',
+                        4: 'trillion',        
+                    }
+        #
+        self.name2 = {
+                        1: '',
+                        2: ('teen', 'ty'),
+                        3: 'hundred',
+                    }
+        #
+        self.sign = {
+                        True: 'minus',
+                        False: '',        
+                    }
+        #
+        self.replace = {}
+        #
+        self.style = {
+                        'separator': ' ', 
+                        'decimal_separator': ' point ',
+                        'dash_separator': '-',
+                    }
+        #
+
+    def get_2d(self, s):
+        s = str(s)
+        #
+        ret = ''
+        if not len(s) == 2: 
+            return ret
+        #
+        res = []
+        rn = ''
+        r = self.word.get(s, '')
+        #
+        if r:
+            res = [r]
+        else:
+            rx = self.name2.get(2, ())
+            if s[0] == '1':
+                rn = rx[0]
+                r = self.get_1d(s[1])
+                res = [r, rn]
+                ret = ''.join(res)
+            elif s[0] == '0':
+                rn = ''
+                r = self.get_1d(s[1])
+                res = [r, '']
+            else:
+                rn = self.word.get(s[0] + '0')
+                r = self.get_1d(s[1])
+                res = []
+                res.append(rn)
+                res.append(self.style.get('dash_separator', ''))
+                res.append(r)
+                ret = ''.join(res)
+        #
+        if not ret:
+            ret = self.separator().join(res)
+        return ret
+
+    def get_3d(self, s):
+        s = str(s)
+        #
+        ret = ''
+        if not len(s) == 3: 
+            return ret
+        #
+        res = []
+        rn = ''
+        r = self.word.get(s, '')
+        #
+        if r:
+            res = [r]
+        else:
+            res2 = []
+            if s[0] == '0':
+                rn = ''
+                r = self.get_2d(s[1:])
+                res2 = [r, rn]
+            else:
+                rn = self.name2.get(3, '')
+                r1 = self.get_1d(s[0])
+                r2 = self.get_2d(s[1:])
+                res2 = [r1, rn, r2]
+            res = [self.separator().join(res2)]
+        #
+        ret = self.separator().join(res)
+        return ret
+
+
+NUMBER_TO_WORDS['id'] = NumberToWordsId
+NUMBER_TO_WORDS['en1'] = NumberToWordsEn1
+    
+
+#----------------------------------------------------------------------#
+# SIMPLEDROPDOWN                                                       #
+#----------------------------------------------------------------------#
+class SimpleDropdown(web.form.Dropdown):
+    def __init__(self, name, args, *validators, **attrs):
+        self.args = args
+        super(SimpleDropdown, self).__init__(name, args, *validators, **attrs)
+    
+    def _render_option(self, arg, indent='  '):
+        if isinstance(arg, (tuple, list)):
+            value, desc= arg
+        else:
+            value, desc = arg, arg 
+
+        #lines below are modified by sqliteboy author: 
+        #- convert to str
+        #- web.net 
+        #- web.utils.safestr
+        #- ref: webpy pull request #279
+        value = web.utils.safestr(value)
+        if isinstance(self.value, (tuple, list)):
+            s_value = [web.utils.safestr(x) for x in self.value]
+        else:
+            s_value = web.utils.safestr(self.value)            
+        
+        if s_value == value or (isinstance(s_value, list) and value in s_value):
+            select_p = ' selected="selected"'
+        else:
+            select_p = ''
+        return indent + '<option%s value="%s">%s</option>\n' % (select_p, web.net.websafe(value), web.net.websafe(desc))
+    
+
+#----------------------------------------------------------------------#
 # LANG                                                                 #
 #----------------------------------------------------------------------#
 LANGS = {
@@ -437,6 +1704,11 @@ LANGS = {
             'x_second': 'second(s)',
             'x_row' : 'row(s)',
             'x_limit': 'limit',
+            'x_page': 'page',
+            'x_next': 'next',
+            'x_previous': 'previous',
+            'x_unlimited': 'unlimited',
+            'x_selected': 'selected',
             'x_default': 'default',
             'x_name': 'name',
             'x_type': 'type',
@@ -445,6 +1717,7 @@ LANGS = {
             'x_rename': 'rename to',
             'x_empty': 'empty',
             'x_column_number': 'number of column',
+            'x_column': 'column(s)',
             'x_table_name': 'table name',
             'x_yes': 'yes',
             'x_no': 'no',
@@ -455,8 +1728,10 @@ LANGS = {
             'x_sqlite_version': 'SQLite version',
             'x_web_version': 'web.py version',
             'x_python_version': 'Python version',
+            'x_reportlab_version': 'ReportLab version',
             'x_extended_features': 'extended features',
             'x_user': 'user',
+            'x_users': 'users',
             'x_delete': 'delete',
             'x_password': 'password',
             'x_admin': 'admin',
@@ -487,14 +1762,48 @@ LANGS = {
             'x_max_file_size_error': 'maximum file size exceeded',
             'x_file_name': 'file name',
             'x_file_size': 'size',
+            'x_database_size': 'size of database file',
+            'x_unused_pages': 'number of unused pages',
             'x_shared': 'shared',
             'x_preview': 'preview',
             'x_expression_too_long': 'expression too long',
             'x_expression_invalid': 'invalid expression',            
+            'x_info': 'info',
+            'x_author': 'author',
+            'x_license': 'license',        
+            'x_run_time': 'run (time)',
+            'x_scripts': 'scripts',
+            'x_max_script_size': 'maximum script size',
+            'x_detail': 'detail',
+            'x_system_check': 'system check',
+            'x_table_exists': 'table already exists, however, additional column(s) will be added',
+            'x_script_not_runnable': 'could not run this script because nothing is defined, or error(s) found, or has been run before',
+            'x_copy_to': 'to',
+            'x_copy_from': 'from',
+            'x_copy_columns_none': 'no identical column found',
+            'x_sqliteboy_x_update': 'updating %s table, please wait...' %(FORM_TBL),
+            'x_sqliteboy_x_update_files': 'updating %s table (files), please wait...' %(FORM_TBL),
+            'x_please_wait': 'please wait...',
+            'x_server_command_mode': 'server command mode',
+            'x_style': 'style',
+            'x_first_name': 'first name',
+            'x_last_name': 'last name',
+            'x_email': 'email',
+            'x_website': 'website',
+            'x_session': 'session(s)',
+            'x_user_defined_profile': 'user-defined profile', 
+            'x_profile': 'profile',
+            'x_create_table_schema': 'create table based on this schema',
+            'x_messages': 'messages',
+            'x_messages_all': 'for all users',
+            'x_application': 'application',
+            'x_application_title': 'title (maximum %s characters)' %(APPLICATION_TITLE_MAX),
+            'x_not_avail_pdf': 'not available, PDF output will be disabled',
             'tt_insert': 'insert',
             'tt_edit': 'edit',
             'tt_column': 'column',
             'tt_rename': 'rename',
+            'tt_empty': 'empty',
             'tt_drop': 'drop',
             'tt_query': 'query',
             'tt_create': 'create',
@@ -516,19 +1825,31 @@ LANGS = {
             'tt_files': 'files',
             'tt_pages': 'page',
             'tt_calculator': 'calculator',
+            'tt_scripts': 'scripts',
+            'tt_script': 'script',
+            'tt_import_csv': 'import',
             'th_error': 'ERROR',
             'th_ok': 'OK',
+            'tt_copy': 'copy',
+            'tt_vacuum': 'vacuum',
+            'tt_profile': 'profile',
+            'tt_schema': 'schema',
             'cmd_browse': 'browse',
             'cmd_insert': 'insert',
             'cmd_column': 'column',
             'cmd_rename': 'rename',
+            'cmd_table_empty': 'empty',
             'cmd_table_drop': 'drop',
-            'cmd_export_csv': 'csv',
+            'cmd_export_csv': 'export',
+            'cmd_import_csv': 'import',
+            'cmd_copy': 'copy',
             'cmd_table_create': 'create',
             'cmd_query': 'query',
+            'cmd_query_export_csv': 'query (export)',
             'cmd_query_src': 'query',
             'cmd_delete_selected': 'delete selected',
             'cmd_edit_selected': 'edit selected',
+            'cmd_clear_selected': 'clear selected',
             'cmd_download': 'download',
             'cmd_edit': 'edit',
             'cmd_add': 'add',
@@ -536,6 +1857,7 @@ LANGS = {
             'cmd_enable_sqliteboy': 'create %s table and enable extended features' %(FORM_TBL),
             'cmd_readme': 'readme',
             'cmd_source': 'source',
+            'cmd_website': 'website',
             'cmd_login': 'login',
             'cmd_logout': 'logout',
             'cmd_password': 'password',
@@ -552,16 +1874,33 @@ LANGS = {
             'cmd_run': 'run',
             'cmd_form_create': 'create',
             'cmd_report_create': 'create',
-            'cmd_report': 'go',
+            'cmd_report': 'report',
             'cmd_view': 'view',
+            'cmd_use_result': 'use the result',
+            'cmd_scripts': 'scripts',
+            'cmd_vacuum': 'vacuum',
+            'cmd_go': 'go',
+            'cmd_go_print': 'go (print)',
+            'cmd_csv': 'csv',
+            'cmd_pdf': 'pdf',
+            'cmd_shortcut': 'shortcut',
+            'cmd_profile': 'profile',
+            'cmd_schema': 'schema',
+            'cmd_hide': 'hide',
+            'cmd_show': 'show',
             'cf_delete_selected': 'are you sure you want to delete selected row(s)?',
             'cf_drop': 'confirm drop table',
+            'cf_empty': 'confirm empty table',
+            'cf_vacuum': 'confirm vacuum database',
+            'e_db_static': 'ERROR: database file must not be placed in static directory',
             'e_notfound': 'ERROR 404: the page you are looking for is not found',
+            'e_internalerror': 'ERROR 500: internal server error',
             'e_access_forbidden': 'access forbidden',
             'e_connect': 'ERROR: unable to connect to',
             'e_insert': 'ERROR: insert into table',
             'e_edit': 'ERROR: update table',
             'e_rename': 'ERROR: alter table (rename)',
+            'e_empty': 'ERROR: empty table',
             'e_drop': 'ERROR: drop table',
             'e_table_exists': 'ERROR: table already exists',
             'e_open_file': 'ERROR: open file',
@@ -590,6 +1929,14 @@ LANGS = {
             'e_report_run_required': 'ERROR: required',
             'e_report_run_constraint': 'ERROR: constraint',
             'e_report_select_general': 'ERROR: processing report',
+            'e_scripts_max_size': 'ERROR: maximum script size exceeded',
+            'e_scripts_syntax_or_required' : 'ERROR: script code error or required keys are not set',
+            'e_scripts_name': 'ERROR: invalid script name',
+            'e_script_column_conflict': 'ERROR: table already exists and conflicted column(s) found',
+            'e_script': 'ERROR: script run',
+            'e_copy': 'ERROR: copy table',
+            'e_import_csv': 'ERROR: import csv',
+            'e_profile': 'ERROR: could not update profile',
             'o_insert': 'OK: insert into table',
             'o_edit': 'OK: update table',
             'o_column': 'OK: alter table (column)',
@@ -597,14 +1944,27 @@ LANGS = {
             'o_password': 'OK: password changed',
             'o_hosts': 'OK: hosts updated',
             'o_system': 'OK: system configuration updated',
-            'o_form_run': 'OK: data saved',
+            'o_form_run': 'OK: form run',
+            'o_form_create': 'OK: create form',
+            'o_report_create': 'OK: create report',
             'o_notes': 'OK: notes updated',
             'o_files': 'OK: files updated',
             'o_pages': 'OK: page updated',
+            'o_scripts': 'OK: scripts updated',
+            'o_script': 'OK: script run',
+            'o_table_create': 'OK: create table',
+            'o_drop': 'OK: drop table',
+            'o_copy': 'OK: copy table',
+            'o_empty': 'OK: empty table',
+            'o_vacuum': 'OK: vacuum database',
+            'o_import_csv': 'OK: import csv',
+            'o_profile': 'OK: profile updated',
+            'o_profile_set': 'OK: profile set',
             'h_insert': 'hint: leave blank to use default value (if any)',
             'h_edit': 'hint: for blob field, leave blank = do not update',
             'h_column': 'hint: only add column is supported in SQLite. Primary key/unique is not allowed in column addition. Default value(s) must be constant.',
             'h_rename': '',
+            'h_empty': '',
             'h_drop': '',
             'h_query': 'hint: only one statement at a time is supported',
             'h_create': 'hint: please do not put whitespace in table name',
@@ -620,8 +1980,15 @@ LANGS = {
             'h_files': '',
             'h_pages': 'hint: HTML tags will be stripped on page save. Please read <a href="%s">README</a> for page code reference. For example: %s' %(URL_README[0], web.htmlquote(SAMPLE_PAGE)),
             'h_calculator': 'hint: valid characters: %s. Maximum length: %s.' %(CALCULATOR_ALLOWED, CALCULATOR_MAX_INPUT),
+            'h_scripts': 'hint: script code in JSON format. Please read <a href="%s">README</a> for script code reference.' %(URL_README[0]),
+            'h_script': 'hint: only valid value(s) will be read. Script could not be run if there is error. Backup before running a script is recommended.',
+            'h_copy': 'hint: copy content of source table to existing destination table (insert), only for identical column(s) (name and type)',
+            'h_vacuum': 'hint: vacuum command will rebuild the entire database and may reduce the size of database file. Please make sure there is enough free space, at least twice the size of the original database file. This command may change the rowids of rows in any tables that do not have an explicit integer primary key column.',
+            'h_import_csv': 'hint: import CSV file (Excel dialect) into table (insert). First row will be read as column(s).',
+            'h_profile': '',
             'z_table_whitespace': 'could not handle table with whitespace in name',
-            'z_view_blob': '[blob, please use browse menu if applicable]',
+            'z_view_blob': '[blob data]',
+            'z_edit_blob_column': 'could not edit this row: blob data in non-blob column',
         },
     }
 
@@ -726,6 +2093,69 @@ def sqliteboy_randrange(a, b):
     return random.randrange(a, b)
 SQLITE_UDF.append(('sqliteboy_randrange', 2, sqliteboy_randrange))
 
+def sqliteboy_randstr(s, a, b):
+    ret = ''
+    #
+    s = str(s)
+    if not isinstance(a, int) or not isinstance(b, int):
+        return ret
+    if a<=0 or b<=0:
+        return ret
+    if b<a:
+        return ret
+    #
+    if b==a:
+        length = a
+    else:
+        length_choice = xrange(a, b)
+        length = random.choice(length_choice)
+    #
+    for i in xrange(length):
+        r = random.choice(s)
+        ret += r
+    #
+    return ret
+SQLITE_UDF.append(('sqliteboy_randstr', 3, sqliteboy_randstr))
+
+def sqliteboy_randstr2(a, b):
+    s = string.letters + string.digits + string.punctuation
+    return sqliteboy_randstr(s, a, b)
+SQLITE_UDF.append(('sqliteboy_randstr2', 2, sqliteboy_randstr2))
+
+def sqliteboy_randstr3(a, b):
+    s = string.letters + string.digits 
+    return sqliteboy_randstr(s, a, b)
+SQLITE_UDF.append(('sqliteboy_randstr3', 2, sqliteboy_randstr3))
+
+def sqliteboy_randstr_simple():
+    return sqliteboy_randstr3(RANDOM_SIMPLE_MIN, RANDOM_SIMPLE_MAX)
+SQLITE_UDF.append(('sqliteboy_randstr_simple', 0, sqliteboy_randstr_simple))
+
+def sqliteboy_is_datetime_format(s, fmt):
+    ret = 0
+    #
+    try:
+        s = s.strip()
+        p = time.strptime(s, fmt)
+        ret = 1
+    except:
+        pass
+    #
+    return ret
+SQLITE_UDF.append(('sqliteboy_is_datetime_format', 2, sqliteboy_is_datetime_format))
+
+def sqliteboy_is_datetime(s):
+    return sqliteboy_is_datetime_format(s, PYTIME_FORMAT)
+SQLITE_UDF.append(('sqliteboy_is_datetime', 1, sqliteboy_is_datetime))
+
+def sqliteboy_is_date(s):
+    return sqliteboy_is_datetime_format(s, PYTIME_DATE_FORMAT)
+SQLITE_UDF.append(('sqliteboy_is_date', 1, sqliteboy_is_date))
+
+def sqliteboy_is_time(s):
+    return sqliteboy_is_datetime_format(s, PYTIME_TIME_FORMAT)
+SQLITE_UDF.append(('sqliteboy_is_time', 1, sqliteboy_is_time))
+
 def sqliteboy_time():
     return time.time()
 SQLITE_UDF.append(('sqliteboy_time', 0, sqliteboy_time))
@@ -745,12 +2175,20 @@ def sqliteboy_time3(f):
         return ''
 SQLITE_UDF.append(('sqliteboy_time3', 1, sqliteboy_time3))
 
+def sqliteboy_time3a():
+    return sqliteboy_time3(sqliteboy_time())
+SQLITE_UDF.append(('sqliteboy_time3a', 0, sqliteboy_time3a))
+
 def sqliteboy_time4(f):
     try:
         return time.strftime(PYTIME_FORMAT, time.gmtime(f))
     except:
         return ''
 SQLITE_UDF.append(('sqliteboy_time4', 1, sqliteboy_time4))
+
+def sqliteboy_time4a():
+    return sqliteboy_time4(sqliteboy_time())
+SQLITE_UDF.append(('sqliteboy_time4a', 0, sqliteboy_time4a))
 
 def sqliteboy_time5(s1, s2, mode):
     s1 = str(s1)
@@ -759,9 +2197,9 @@ def sqliteboy_time5(s1, s2, mode):
         mode = 0
     #
     tnow = sqliteboy_time()
-    if not s1.strip():
+    if not s1.strip() or not sqliteboy_is_datetime(s1):
         s1 = sqliteboy_time3(tnow)
-    if not s2.strip():
+    if not s2.strip() or not sqliteboy_is_datetime(s2):
         s2 = sqliteboy_time3(tnow)
     #
     t1 = sqliteboy_time2(s1)
@@ -785,6 +2223,61 @@ def sqliteboy_time5(s1, s2, mode):
     #
     return ret
 SQLITE_UDF.append(('sqliteboy_time5', 3, sqliteboy_time5)) 
+
+def sqliteboy_time6(f, year, month, day, mode):
+    ret = ''
+    #
+    try:
+        f = float(f)
+    except:
+        return ret
+    #
+    year = str(year)
+    month = str(month)
+    day = str(day)
+    #
+    if not sqliteboy_is_integer(mode) or mode < 0:
+        mode = 0
+    #
+    if 'e' in str(f).lower():
+        return ret
+    #
+    f1, f2 = str(f).split('.')
+    try:
+        y = int(f1)
+    except:
+        return ret
+    #
+    leftm = f - y
+    fm = float(leftm * 12) 
+    m1, m2 = str(fm).split('.')
+    try:
+        m = int(round(float(m1), 0))
+    except:
+        return ret
+    #
+    leftd = fm - m
+    d = int(round(leftd * DAYS_IN_MONTH_AVERAGE, 0))
+    d30 = int(round(leftd * DAYS_IN_MONTH_30, 0))
+    d31 = int(round(leftd * DAYS_IN_MONTH_31, 0))
+    #
+    dd = d
+    if mode == 1:
+        dd = d30
+    elif mode == 2:
+        dd = d31
+    #
+    ret = '%s%s%s%s%s%s' %(
+            y,
+            year,
+            m,
+            month,
+            dd,
+            day
+        )
+    #
+    return ret
+SQLITE_UDF.append(('sqliteboy_time6', 5, sqliteboy_time6))
 
 def sqliteboy_is_leap(n):
     ret = 0
@@ -875,6 +2368,31 @@ def sqliteboy_reverse(s):
     #
     return s[::-1]
 SQLITE_UDF.append(('sqliteboy_reverse', 1, sqliteboy_reverse))
+
+def sqliteboy_repeat(s, n):
+    s = str(s)
+    #
+    if not sqliteboy_is_integer(n) or n < 1:
+        n = 1
+    #
+    n = abs(n)
+    ret = s * n
+    return ret
+SQLITE_UDF.append(('sqliteboy_repeat', 2, sqliteboy_repeat))
+
+def sqliteboy_count(s, sub, case):
+    s = str(s)
+    sub = str(sub)
+    #
+    if not sqliteboy_is_integer(case) or case < 0:
+        case = 0
+    if not case: #ignore case
+        s = s.lower()
+        sub = sub.lower()
+    #    
+    ret = s.count(sub)
+    return ret
+SQLITE_UDF.append(('sqliteboy_count', 3, sqliteboy_count))
 
 def sqliteboy_is_valid_email(s):
     s = sqliteboy_strs(s)
@@ -969,6 +2487,31 @@ def sqliteboy_normalize_separator(s, separator, remove_space, unique):
     return ret
 SQLITE_UDF.append(('sqliteboy_normalize_separator', 4, sqliteboy_normalize_separator))
 
+def sqliteboy_split0(s, separator, index):
+    ret = ''
+    #
+    s = str(s)
+    separator = str(separator)
+    #
+    if not sqliteboy_is_integer(index):
+        return ret
+    #
+    if not s.strip():
+        return ret
+    #
+    if separator:
+        data = s.split(separator)
+    else:
+        data = s.split()
+    #
+    try:
+        ret = data[index]
+    except:
+        pass
+    #
+    return ret
+SQLITE_UDF.append(('sqliteboy_split0', 3, sqliteboy_split0))
+
 def sqliteboy_chunk(s, n, separator, justify, padding):
     s = str(s)
     separator = str(separator)
@@ -1051,10 +2594,84 @@ def sqliteboy_number_format(n, decimals, decimal_point, thousands_separator):
     return ret
 SQLITE_UDF.append(('sqliteboy_number_format', 4, sqliteboy_number_format))
 
+def sqliteboy_number_to_words(s, language):
+    ret = ''
+    #
+    s = str(s)
+    language = str(language).lower()
+    #
+    if not language in NUMBER_TO_WORDS.keys():
+        return ret
+    #
+    oc = NUMBER_TO_WORDS.get(language)
+    try:
+        oo = oc()
+        ret = oo.get_words(s)
+    except:
+        pass
+    #
+    return ret
+SQLITE_UDF.append(('sqliteboy_number_to_words', 2, sqliteboy_number_to_words))
+
+def sqliteboy_lookup1(table, field, field1, value1, function, distinct):
+    ret = ''
+    #
+    function_all = [
+                    'avg',
+                    'count',
+                    'group_concat',
+                    'max',
+                    'min',
+                    'sum',
+                    'total'
+            ]
+    #
+    table = str(table).lower()
+    field = str(field).lower()
+    field1 = str(field1).lower()
+    function = str(function).lower()
+    #
+    if not table in tables():
+        return ret
+    cols = columns(table, True)
+    if not field1 in cols or not field in cols:
+        return ret
+    if not function in function_all:
+        return ret
+    if not sqliteboy_is_number(distinct) or distinct < 0:
+        distinct = 0        
+    #
+    where = [
+            '%s=$%s' %(field1, field1), 
+            ]
+    var = {field1: value1}
+    #
+    sdistinct = ''
+    if distinct:
+        sdistinct = ' distinct '
+    #
+    what_field = '%s(%s %s)' %(function, sdistinct, field)
+    #
+    try:
+        r = db.select(
+            table,
+            what=what_field,
+            where=' and '.join(where),
+            vars=var).list()
+        ret = r[0][what_field]
+    except:
+        pass
+    #
+    if ret: 
+        ret = str(ret)
+    #
+    return ret
+SQLITE_UDF.append(('sqliteboy_lookup1', 6, sqliteboy_lookup1))
+
 def sqliteboy_lookup2(table, field, field1, value1, order, default):
-    table = str(table)
-    field = str(field)
-    field1 = str(field1)
+    table = str(table).lower()
+    field = str(field).lower()
+    field1 = str(field1).lower()
     if not sqliteboy_is_number(order) or order < 0:
         order = 0
     #
@@ -1090,10 +2707,10 @@ def sqliteboy_lookup2(table, field, field1, value1, order, default):
 SQLITE_UDF.append(('sqliteboy_lookup2', 6, sqliteboy_lookup2))
     
 def sqliteboy_lookup3(table, field, field1, value1, field2, value2, order, default):
-    table = str(table)
-    field = str(field)
-    field1 = str(field1)
-    field2 = str(field2)
+    table = str(table).lower()
+    field = str(field).lower()
+    field1 = str(field1).lower()
+    field2 = str(field2).lower()
     if not sqliteboy_is_number(order) or order < 0:
         order = 0
     #
@@ -1129,6 +2746,141 @@ def sqliteboy_lookup3(table, field, field1, value1, field2, value2, order, defau
     return ret
 SQLITE_UDF.append(('sqliteboy_lookup3', 8, sqliteboy_lookup3))
 
+def sqliteboy_split1(s, separator, table, column, convert):
+    ret = 0
+    #
+    s = str(s)
+    separator = str(separator)
+    table = str(table).strip().lower()
+    column = str(column).strip().lower()
+    if not sqliteboy_is_integer(convert) or convert < 0:
+        convert = 0
+    #
+    if not s.strip():
+        return ret
+    #
+    if not table in tables():
+        return ret
+    #
+    if not column in columns(table, True):
+        return ret
+    #
+    if separator:
+        data = s.split(separator)
+    else:
+        data = s.split()
+    if not data:
+        return ret
+    #
+    if hasws(table) or hasws(column):
+        return ret
+    #
+    cols = columnst(table)
+    colt = cols.get(column)
+    f = COLUMN_CONVERT.get(colt)
+    if not f:
+        f = COLUMN_CONVERT_DEFAULT
+    #
+    func = globals().get(f)
+    if not callable(func):
+        return ret
+    #
+    count = 0
+    t = db.transaction()
+    try:
+        for d in data:
+            if convert:
+                x = func(d)
+            else:
+                x = d
+            #
+            r = db.query(
+                    '''
+                        insert into $table ($column) values($data)
+                    ''',
+                    vars = {
+                            'table': web.sqlliteral(table),
+                            'column': web.sqlliteral(column),
+                            'data': x,
+                        }
+                )
+            if r:
+                count += 1
+    except:
+        return ret
+    else:
+        t.commit()
+        ret = count
+    #
+    return ret
+SQLITE_UDF.append(('sqliteboy_split1', 5, sqliteboy_split1))    
+
+def sqliteboy_list_datetime1(s, n, interval, table, column, local):
+    ret = 0
+    #
+    s = str(s).strip()
+    table = str(table).strip().lower()
+    column = str(column).strip().lower()
+    #
+    if not sqliteboy_is_integer(n) or n < 1:
+        return ret
+    #
+    if not sqliteboy_is_integer(interval) or interval == 0:
+        return ret
+    #
+    if not sqliteboy_is_integer(local) or local < 0:
+        local = 0
+    #
+    if not table in tables():
+        return ret
+    #
+    if not column in columns(table, True):
+        return ret
+    #
+    tnow = sqliteboy_time()
+    if not s:
+        s = sqliteboy_time3(tnow)
+    #
+    if not sqliteboy_is_datetime(s):
+        return ret
+    #
+    t2 = sqliteboy_time2(s)
+    #
+    count = 0
+    t = db.transaction()
+    try:
+        for i in range(n):
+            if local:
+                t3 = sqliteboy_time3(t2)
+            else:
+                t3 = sqliteboy_time4(t2)
+            #
+            if not t3:
+                continue
+            #
+            r = db.query(
+                    '''
+                        insert into $table ($column) values($data)
+                    ''', 
+                    vars={
+                        'table': web.sqlliteral(table),
+                        'column': web.sqlliteral(column),
+                        'data': t3,
+                    }
+                )
+            if r:
+                count += 1
+            #
+            t2 += interval
+    except:
+        return ret
+    else:
+        t.commit()
+        ret = count
+    #
+    return ret
+SQLITE_UDF.append(('sqliteboy_list_datetime1', 6, sqliteboy_list_datetime1))
+
 def sqliteboy_http_remote_addr():
     return web.ctx.ip
 SQLITE_UDF.append(('sqliteboy_http_remote_addr', 0, sqliteboy_http_remote_addr))
@@ -1136,6 +2888,30 @@ SQLITE_UDF.append(('sqliteboy_http_remote_addr', 0, sqliteboy_http_remote_addr))
 def sqliteboy_http_user_agent():
     return web.ctx.env.get('HTTP_USER_AGENT', '')
 SQLITE_UDF.append(('sqliteboy_http_user_agent', 0, sqliteboy_http_user_agent))
+
+def sqliteboy_app_title():
+    return TITLE
+SQLITE_UDF.append(('sqliteboy_app_title', 0, sqliteboy_app_title))
+
+def sqliteboy_var_set(name, value):
+    name = str(name)
+    return v_set(name, value)
+SQLITE_UDF.append(('sqliteboy_var_set', 2, sqliteboy_var_set))
+
+def sqliteboy_var_get(name):
+    name = str(name)
+    return v_get(name)
+SQLITE_UDF.append(('sqliteboy_var_get', 1, sqliteboy_var_get))
+
+def sqliteboy_var_del(name):
+    name = str(name)
+    return v_del(name)
+SQLITE_UDF.append(('sqliteboy_var_del', 1, sqliteboy_var_del))
+
+def sqliteboy_strip_html(s):
+    s = str(s)
+    return striphtml(s)
+SQLITE_UDF.append(('sqliteboy_strip_html', 1, sqliteboy_strip_html))
 
 
 #----------------------------------------------------------------------#
@@ -1206,8 +2982,11 @@ def s_select(p, string=True, what='*, rowid', order='rowid asc'):
     #
     return ret
 
-def s_save(p, last=False):
-    pr = p.split(FORM_SPLIT)[:len(FORM_FIELDS)]
+def s_save(p, last=False, maxsplit=0):
+    if maxsplit:
+        pr = p.split(FORM_SPLIT, maxsplit)[:len(FORM_FIELDS)]
+    else:
+        pr = p.split(FORM_SPLIT)[:len(FORM_FIELDS)]
     sf = []
     sv = []
     sd = {}
@@ -1340,7 +3119,7 @@ def proc_admin_check(handle):
     path = web.ctx.fullpath.lower()
     if not isnosb():
         if not sess.admin == 1:
-            if path.startswith('/query') or path.startswith('/table') or path.startswith('/admin') or path.startswith('/form/edit') or path.startswith('/report/edit'):
+            if path.startswith('/vacuum') or path.startswith('/query') or path.startswith('/table') or path.startswith('/admin') or path.startswith('/form/edit') or path.startswith('/report/edit'):
                 if sess.user:
                     return _['e_access_forbidden']
                 else:
@@ -1365,6 +3144,10 @@ def proc_login(handle):
 def proc_nosb(handle):
     path = web.ctx.fullpath.lower()
     if isnosb():
+        #
+        if sess.user:
+            sess.user = ''
+        #
         if path.startswith('/login') or  \
             path.startswith('/logout') or \
             path.startswith('/password') or \
@@ -1376,6 +3159,7 @@ def proc_nosb(handle):
             path.startswith('/pages') or \
             path.startswith('/page') or \
             path.startswith('/calculator') or \
+            path.startswith('/profile') or \
             path.startswith('/admin'):
                 raise web.seeother('/')
     #
@@ -1388,6 +3172,20 @@ def proc_udf(handle):
     return handle()
 
 def proc_misc(handle):
+    return handle()
+
+def proc_account_check(handle):
+    if not isnosb():
+        a = s_select('user.account')
+        if not a:
+            db.insert(FORM_TBL, 
+                a='user', 
+                b='account', 
+                d=DEFAULT_ADMIN_USER, 
+                e=md5(DEFAULT_ADMIN_PASSWORD).hexdigest(), 
+                f='1'
+            )
+    #
     return handle()
 
 def allows():
@@ -1433,6 +3231,23 @@ def notfound():
     content = ''
     stop()
     return web.notfound(T(data, content))
+
+def internalerror():
+    start()
+    data = {
+                'title': _['th_error'],
+                'command': 'error_500',
+                'message': _['e_internalerror'],
+                'path': web.ctx.path,
+                'method': web.ctx.method,
+            }
+    #
+    exc_t, exc_v = sys.exc_info()[:2]
+    content = traceback.format_exception_only(exc_t, exc_v)
+    content = [str(x).strip() for x in content]
+    #
+    stop()
+    return web.internalerror(T(data, content))    
 
 def dflt():
     raise web.seeother('/')
@@ -1541,7 +3356,7 @@ def tables(first_blank=False, exclude=EXCLUDE_TABLE):
     #
     r = db.select('sqlite_master', 
             where='type="table"',
-            what='name',
+            what='lower(name) as name',
             order="name asc")
     for i in r:
         if hasws(i.name): continue #whitespace in table name
@@ -1563,11 +3378,28 @@ def columns(table, name_only=False):
     #
     for i in r:
         if name_only == True:
-            ret.append(i.name)
+            ret.append(i.name.lower())
         else:
             d = {}
             for k in i.keys(): d[k.lower()] = i[k]
             ret.append(d)
+    #
+    return ret
+
+def columnst(table):
+    ret = {}
+    #
+    cols = columns(table)
+    if not cols:
+        return ret
+    #
+    for k in cols:
+        kn = k.get('name', '')
+        kt = k.get('type', '')
+        kn = str(kn).strip().lower()
+        kt = str(kt).strip().lower()
+        if kn and kt:
+            ret[kn] = kt
     #
     return ret
 
@@ -1583,6 +3415,7 @@ def forms(first_blank=False, obj='form.code'):
         except:
             pass
     #
+    ret = [str(x).lower() for x in ret]
     ret.sort()
     return ret
     
@@ -1638,15 +3471,19 @@ def menugen():
                 _['x_table'],
                 f, 
                 (
-                    ['browse', _['cmd_browse']],
-                    ['browse/%s' %(DEFAULT_LIMIT), _['cmd_browse'] + ' (%s)' %(DEFAULT_LIMIT)],
+                    ['browse/%s' %(DEFAULT_LIMIT), _['cmd_browse']],
                     ['insert', _['cmd_insert']],
                     ['column', _['cmd_column']],
                     ['rename', _['cmd_rename']],
+                    ['table_empty', _['cmd_table_empty']],
                     ['table_drop', _['cmd_table_drop']],
                     ['export_csv', _['cmd_export_csv']],
+                    ['import_csv', _['cmd_import_csv']],
+                    ['schema', _['cmd_schema']],
+                    ['copy', _['cmd_copy']],
                     ['table_create', _['cmd_table_create']],
                     ['query', _['cmd_query']],
+                    ['vacuum', _['cmd_vacuum']],
                 )
             ])
     #
@@ -1656,6 +3493,7 @@ def menugen():
         #
         formact =  [
                     ['run', _['cmd_run']],
+                    ['shortcut', _['cmd_shortcut']],
                 ]
         for af in aform1:
             if not canform(FORM_KEY_SECURITY_RUN, af):
@@ -1678,6 +3516,18 @@ def menugen():
                 f2, 
                 formact,
             ])
+        #
+        shortcut_form = r_shortcuts().get(SHORTCUT_TYPE_FORM)
+        if shortcut_form:
+            ret.append(
+                [
+                    '/form/run',
+                    'get',
+                    '',
+                    [], 
+                    [],
+                    shortcut_form,
+                ])            
     #
     if not isnosb() and sess.user:
         arep = reports(first_blank=True)
@@ -1685,6 +3535,7 @@ def menugen():
         #
         repact =  [
                     ['run', _['cmd_run']],
+                    ['shortcut', _['cmd_shortcut']],
                 ]
         for af in arep1:
             if not canreport(REPORT_KEY_SECURITY_RUN, af):
@@ -1707,11 +3558,26 @@ def menugen():
                 f3, 
                 repact,
             ])
+        #
+        shortcut_report = r_shortcuts().get(SHORTCUT_TYPE_REPORT)
+        if shortcut_report:
+            ret.append(
+                [
+                    '/report/run',
+                    'get',
+                    '',
+                    [], 
+                    [],
+                    shortcut_report,
+                ])                        
     #
     return ret
 
 def hasws(s):
     ret = False
+    #
+    if not isstr(s, True):
+        return ret
     #
     for w in string.whitespace:
         if w in s:
@@ -1753,8 +3619,12 @@ def isnosb():
     return not FORM_TBL in tables()
     
 def sysinfo():
-    s_a = '%s %s %s' %(VERSION, link(URL_README[0], _['cmd_readme']), 
-        link(URL_SOURCE[0], _['cmd_source']))
+    s_a = '%s %s %s %s' %(
+                VERSION, 
+                link(URL_README[0], _['cmd_readme']), 
+                link(URL_SOURCE[0], _['cmd_source']),
+                link(WSITE, _['cmd_website']),
+            )
     #
     s_sb0 = _['x_extended_features']
     if isnosb():
@@ -1767,23 +3637,31 @@ def sysinfo():
     #
     s_adm = _['x_no']
     if isadmin(): 
-        s_adm = '%s %s %s %s %s' %(
+        s_adm = '%s %s %s %s %s %s' %(
             _['x_yes'], 
             link('/admin/users', _['cmd_users']),
             link('/admin/hosts', _['cmd_hosts']),
             link('/admin/system', _['cmd_system']),
             link('/admin/backup', _['cmd_backup']),
+            link('/admin/scripts', _['cmd_scripts']),
             )
     if isnosb(): s_adm = _['x_not_applicable']
+    #
+    try:
+        s_reportlab = reportlab.Version
+    except:
+        s_reportlab = _['x_not_avail_pdf']
     #
     ret = [
             (_['x_version'], s_a),
             (_['x_sqlite_version'], db.db_module.sqlite_version),
             (_['x_python_version'], platform.python_version()),
             (_['x_web_version'], web.__version__),
+            (_['x_reportlab_version'], s_reportlab),
             s_sb,
             (_['x_admin'], s_adm),
             (_['x_allow'], allows()),
+            (_['x_session'], len(sess.store)),
         ]
     #
     return ret
@@ -1806,11 +3684,14 @@ def reqform(form):
     #
     return True
 
-def fref(reference):
+def fref(reference, execute_sql=True, input_name='input_name'):
     reference2 = 0
     if (type(reference) in [type(''), type(u'')]) and reference:#query
         reference2 = []
         try:
+            if not execute_sql:
+                reference = ''
+            #
             res = db.query(reference)
             for r in res:
                 reference2.append(
@@ -1828,12 +3709,25 @@ def fref(reference):
                 reference2.append([r[0], r[1]])
         except:
             pass
+    elif isinstance(reference, int): #int
+        if reference == REFERENCE_FLAG_PASSWORD:
+            reference2 = web.form.Password(input_name)
     else:
         reference2 = 0
     #
     return reference2
     
-def fdef(default):
+def fref2(reference, name):
+    ret = None
+    #
+    if isinstance(reference, list):
+        ret = SimpleDropdown(name, args=reference)
+    elif hasattr(reference, 'render'):
+        ret = reference
+    #
+    return ret
+    
+def fdef(default, execute_sql=True):
     default2 = default
     if not default2:
         default2 = ''
@@ -1844,26 +3738,44 @@ def fdef(default):
         deff = default[0]
         default.pop(0)
         defs = []
+        defq = ''
         try:
-            for dd in default:
-                dq = web.sqlquote(dd)
-                defs.append(dq)
-            #
-            if defs:
-                defsq = web.sqlquote('').join(defs, ',')
+            if default and not str(deff).strip():
+                defq = str(default[0])
             else:
-                defsq = ''
+                for dd in default:
+                    dq = web.sqlquote(dd)
+                    defs.append(dq)
+                #
+                if defs:
+                    defsq = web.sqlquote('').join(defs, ',')
+                else:
+                    defsq = ''
+                #
+                defq = 'select %s(%s) as %s' %(deff, defsq, FORM_DEFAULT_SQL_RET)
             #
-            defq = 'select %s(%s) as f' %(deff, defsq)
+            if not execute_sql:
+                defq = ''
+            #
             defr = db.query(defq).list()
             if defr:
-                default2 = defr[0]['f']
+                default2 = defr[0][FORM_DEFAULT_SQL_RET]
         except:
             pass
     #
     return default2
+
+def fsqlx(db, sql, data):
+    fsql2 = sql
+    ocols = data
+    #
+    if fsql2 and type(fsql2) == type([]):
+        for fsql in fsql2:
+            if fsql and hasattr(fsql, 'strip'):
+                if fsql.strip():
+                    db.query(fsql, vars=ocols)    
     
-def parseform2(code, table):
+def parseform2(code, table, execute_sql=True):
     fsub = code
     if not type(fsub) == type([]):
         fsub = []
@@ -1914,14 +3826,13 @@ def parseform2(code, table):
                 if not dl: 
                     dl = dc
                 #
-                reference2 = fref(reference)
+                dcname = '%s.%s' %(fsub_table, dc)
                 #
-                reference3 = None
-                if type(reference2) == type([]):
-                    dcname = '%s.%s' %(fsub_table, dc)
-                    reference3 = web.form.Dropdown(dcname, args=reference2)
+                reference2 = fref(reference, execute_sql, dcname)
                 #
-                default2 = fdef(default)
+                reference3 = fref2(reference2, dcname)
+                #
+                default2 = fdef(default, execute_sql)
                 #
                 if reference3:
                     reference3.set_value(default2)
@@ -1935,17 +3846,23 @@ def parseform2(code, table):
     #
     return fsub2
 
-def parseform(form):
-    fo = s_select('form.code..%s' %(form))
-    try:
-        fo = fo[0]['e']
-        fo = json.loads(fo)
-    except:
-        fo = {}
+def parseform(form, virtual={}, execute_sql=True):
+    fo = {}
+    #
+    if isstr(form):
+        fo = s_select('form.code..%s' %(form))
+        try:
+            fo = fo[0]['e']
+            fo = json.loads(fo)
+        except:
+            fo = {}
+    elif isinstance(form, dict):
+        fo = form
     #
     ftitle = fo.get(FORM_KEY_TITLE, form)
     finfo = fo.get(FORM_KEY_INFO, '')
     #single table
+    table = ''
     fdata = fo.get(FORM_KEY_DATA)
     input = []
     colstb = {}
@@ -1956,8 +3873,17 @@ def parseform(form):
         except:
             table = ''
         #
-        cols = columns(table)
-        colsn = columns(table, name_only=True)
+        cols = []
+        colsn = []
+        if isinstance(virtual, dict) and virtual:
+            try:
+                cols = columns(table) + virtual.get(table, [])
+                colsn = [x.get('name') for x in cols]
+            except:
+                pass
+        else:
+            cols = columns(table)
+            colsn = columns(table, name_only=True)
         #
         for fd in fdata:
             if not type(fd) == type({}):
@@ -1981,13 +3907,11 @@ def parseform(form):
                             if c.get('pk', 0) == 1:
                                 label = '%s%s' %(label, PK_SYM)
                     #
-                    reference2 = fref(reference)
+                    reference2 = fref(reference, execute_sql, col)
                     #
-                    reference3 = None
-                    if type(reference2) == type([]):
-                        reference3 = web.form.Dropdown(col, args=reference2)
+                    reference3 = fref2(reference2, col)
                     #
-                    default2 = fdef(default)
+                    default2 = fdef(default, execute_sql)
                     #
                     if reference3:
                         try:
@@ -2028,7 +3952,7 @@ def parseform(form):
                     )
     #
     fsub = fo.get(FORM_KEY_SUB, [])
-    fsub2 = parseform2(fsub, table)
+    fsub2 = parseform2(fsub, table, execute_sql)
     #
     message1 = fo.get(FORM_KEY_MESSAGE, [])  
     if not type(message1) == type([]):
@@ -2043,7 +3967,26 @@ def parseform(form):
         sql2 = []
     sql2 = [str(x) for x in sql2 if isstr(x)]
     #
-    return [ftitle, finfo, input, fsub2, message2, sql2]
+    finsert = fo.get(FORM_KEY_INSERT)
+    try:
+        finsert = int(finsert)
+    except:
+        finsert = FORM_INSERT_DEFAULT
+    #
+    fconfirm = fo.get(FORM_KEY_CONFIRM, '')
+    try:
+        if not isstr(fconfirm):
+            fconfirm = str(fconfirm)
+        fconfirm = fconfirm.strip()
+    except:
+        fconfirm = ''
+    #
+    sql0 = fo.get(FORM_KEY_SQL0, [])  
+    if not type(sql0) == type([]):
+        sql0 = []
+    sql0 = [str(x) for x in sql0 if isstr(x)]
+    #
+    return [ftitle, finfo, input, fsub2, message2, sql2, finsert, fconfirm, sql0]
 
 def reqreport(report):
     try:
@@ -2063,13 +4006,76 @@ def reqreport(report):
     #
     return True
 
-def parsereport(report):
-    fo = s_select('report.code..%s' %(report))
-    try:
-        fo = fo[0]['e']
-        fo = json.loads(fo)
-    except:
-        fo = {}
+def rheaders(data, cell_len, cell_types):
+    r0 = []
+    r1 = 0
+    ret = [r0, r1]
+    #
+    if not isinstance(data, list):
+        return ret
+    #
+    if not data:
+        return ret
+    #
+    for i in data:
+        #
+        if not isinstance(i, list):    
+            continue
+        #
+        if not i:
+            continue
+        #
+        temp = []
+        for j in i:
+            #
+            if not isinstance(j, list):
+                continue
+            #
+            lj = len(j)
+            #
+            if not lj == cell_len:
+                continue
+            #
+            error = 1
+            try:
+                for k in range(lj):
+                    if not isinstance(j[k], cell_types[k]):
+                        raise Exception
+                error = 0
+            except:
+                error = 1
+            #
+            if error:
+                continue
+            #
+            temp.append(j)
+            #
+            lt = len(temp)
+            if lt > r1:
+                r1 = lt
+            #
+        #
+        if temp:
+            r0.append(temp)
+    #
+    ret = [r0, r1]
+    return ret    
+    
+def rfooters(data, cell_len, cell_types):
+    return rheaders(data, cell_len, cell_types)
+
+def parsereport(report, execute_sql=True):
+    fo = {}
+    #
+    if isstr(report):
+        fo = s_select('report.code..%s' %(report))
+        try:
+            fo = fo[0]['e']
+            fo = json.loads(fo)
+        except:
+            fo = {}
+    elif isinstance(report, dict):
+        fo = report
     #
     ftitle = fo.get(REPORT_KEY_TITLE, report)
     finfo = fo.get(REPORT_KEY_INFO, '')
@@ -2108,13 +4114,11 @@ def parsereport(report):
             constraint = fd.get(REPORT_KEY_DATA_CONSTRAINT, [])
             type1 = fd.get(REPORT_KEY_DATA_TYPE, '').lower().strip()
             #
-            reference2 = fref(reference)
+            reference2 = fref(reference, execute_sql, key)
             #
-            reference3 = None
-            if type(reference2) == type([]):
-                reference3 = web.form.Dropdown(key, args=reference2)
+            reference3 = fref2(reference2, key)
             #
-            default2 = fdef(default)
+            default2 = fdef(default, execute_sql)
             #
             if reference3:
                 try:
@@ -2154,7 +4158,77 @@ def parsereport(report):
                 )
             )
     #
-    return [ftitle, finfo, input, rquery, rheader, message2]
+    xheaders = fo.get(REPORT_KEY_HEADERS, [])
+    oheaders = rheaders(
+                        xheaders, 
+                        REPORT_HEADERS_CELL_LEN, 
+                        REPORT_HEADERS_CELL_TYPES,
+                    )
+    #
+    xfooters = fo.get(REPORT_KEY_FOOTERS, [])
+    ofooters = rfooters(
+                        xfooters, 
+                        REPORT_FOOTERS_CELL_LEN, 
+                        REPORT_FOOTERS_CELL_TYPES,
+                    )
+    #
+    xpaper = fo.get(REPORT_KEY_PAPER, [])
+    try:
+        if not isinstance(xpaper, list): 
+            raise Exception
+        #
+        xpaper2 = [ 
+                        float(xpaper[0]), #width
+                        float(xpaper[1]), #height
+                ]
+        #
+        xpaper2 = [abs(x) for x in xpaper2]
+    except:
+        xpaper2 = []
+    #
+    xmargins = fo.get(REPORT_KEY_MARGINS, [])
+    try:
+        if not isinstance(xmargins, list): 
+            raise Exception
+        #
+        xmargins2 = [ 
+                        float(xmargins[0]), #left
+                        float(xmargins[1]), #right
+                        float(xmargins[2]), #top
+                        float(xmargins[3]), #bottom
+                ]
+        #
+        xmargins2 = [abs(x) for x in xmargins2]
+    except:
+        xmargins2 = []
+    #
+    fconfirm = fo.get(REPORT_KEY_CONFIRM, '')
+    try:
+        if not isstr(fconfirm):
+            fconfirm = str(fconfirm)
+        fconfirm = fconfirm.strip()
+    except:
+        fconfirm = ''    
+    #
+    aligns = fo.get(REPORT_KEY_ALIGN, [])
+    if not isinstance(aligns, list): 
+        aligns = []
+    aligns2 = {}
+    for i in range(0, len(rheader)):
+        try:
+            ialign = aligns[i]
+            if not ialign in REPORT_ALIGN_ALL:
+                raise Exception
+        except:
+            ialign = REPORT_ALIGN_DEFAULT
+        aligns2[rheader[i]] = ialign
+    #    
+    return [ftitle, finfo, input, rquery, rheader, message2, oheaders, ofooters,
+            xpaper2,
+            xmargins2,
+            fconfirm,
+            aligns2,
+        ]
 
 def nqtype(ftype):
     ret = False
@@ -2165,9 +4239,23 @@ def nqtype(ftype):
     #
     return ret 
 
-def s_init():
+def s_init_q(table=FORM_TBL):
     af = [x + ' ' + FORM_FIELD_TYPE for x in FORM_FIELDS]
-    cmd = 'CREATE TABLE %s(%s)' %(FORM_TBL, ','.join(af))
+    #
+    ret = '''
+        CREATE TABLE %s (
+                rowid integer primary key autoincrement, 
+                rowtime integer default (datetime('now', 'localtime')),
+                %s
+            )
+        ''' %(
+                table, ','.join(af)
+            )
+    #
+    return ret
+
+def s_init():
+    cmd = s_init_q()
     db.query(cmd)
     prepsess()
     db.insert(FORM_TBL, a='user', b='account', d=DEFAULT_ADMIN_USER, 
@@ -2325,6 +4413,32 @@ def r_fs_ok(sid):
     #
     return False
 
+def r_fs_content(sid):
+    ret = []
+    #
+    try:
+        r = db.select(FORM_TBL, 
+                        what='d, e, g', 
+                        where='rowid=$sid',
+                        vars={
+                                'sid': long(sid),
+                            }
+                    )
+        r = r[0]
+        ft = json.loads(r.g).get('type')
+        fn = r.d
+        fraw = json.loads(r.g).get('raw')
+        if fraw == 1 or isblob(r.e):
+            fc = r.e
+        else:
+            fc = base64.b64decode(r.e)    
+        #
+        ret = [fn, ft, fc]
+    except:
+        pass
+    #
+    return ret
+
 def striphtml(text):
     data = StripHTMLParser()
     data.feed(text)
@@ -2332,7 +4446,9 @@ def striphtml(text):
     return ret
 
 def tr_page(code):
-    s = code
+    s = str(code)
+    #
+    s = striphtml(s)
     #
     for r in REGEX_PAGE:
         try:
@@ -2345,6 +4461,1182 @@ def tr_page(code):
     #
     return s
         
+def fsize(f, working_dir=CURDIR, human_readable=True):
+    sz = 0
+    #
+    try:
+        f = os.path.abspath(os.path.join(working_dir, f))
+        #
+        sz = os.path.getsize(f)
+    except:
+        pass
+    #
+    ret = sz
+    if human_readable:
+        ret = size(sz)
+    #
+    return ret
+
+def tr_newline(s, br='<br/>'):
+    ret = str(s)
+    #
+    ret = ret.replace('\r\n', br)
+    ret = ret.replace('\n\r', br)
+    ret = ret.replace('\r', br)
+    ret = ret.replace('\n', br)
+    #
+    return ret
+
+def tr_newline_html(s):
+    return tr_newline(s, '<br>')
+
+def tr_report_text(s, data):
+    ret = s
+    #
+    return ret
+
+def r_scripts():
+    ret = []
+    #
+    q = 'install.scripts'
+    #
+    content = s_select(q)
+    for c in content:
+        e = {}
+        try:
+            e = json.loads(c.get('e'))
+        except:
+            pass
+        c[SCRIPT_KEY_NAME] = e.get(SCRIPT_KEY_NAME, '')
+        c[SCRIPT_KEY_INFO] = e.get(SCRIPT_KEY_INFO, '')
+        c[SCRIPT_KEY_AUTHOR] = e.get(SCRIPT_KEY_AUTHOR, '')
+        c[SCRIPT_KEY_LICENSE] = e.get(SCRIPT_KEY_LICENSE, '')
+        #
+        cn = c.get(SCRIPT_KEY_NAME, '')
+        if isstr(cn):
+            cn = cn.strip()
+        if not isstr(cn) or not cn:
+            continue
+        #
+        ret.append(c)
+    #
+    return ret
+
+def g_script(script):
+    ret = {}
+    #
+    scripts = r_scripts()
+    #
+    for s in scripts:
+        rowid = s.get('rowid', '')
+        if not isstr(rowid):
+            continue
+        #
+        if script == rowid:
+            ret = s
+            break
+    #
+    return ret
+
+def xreqparsed(parsed, required):
+    ret = False
+    #
+    try:
+        for r in required:
+            if not parsed[r]:
+                return ret
+    except:
+        return ret
+    #
+    return True
+
+def xparsescript(script):
+    ret = {}
+    #
+    e = {}
+    try:
+        e = json.loads(script.get('e'))
+    except:
+        pass
+    #
+    for k in SCRIPT_REQ:
+        if not e.has_key(k):
+            return ret
+    #
+    ttypes = []
+    for x in COLUMN_TYPES:
+        if x[1]:
+            ttypes.append(x[0])
+    tpk = [x[1] for x in SCRIPT_VALID_COLUMN_FLAG]
+    tcode = e.get(SCRIPT_KEY_TABLES, [])
+    if not isinstance(tcode, list):
+        tcode = []
+    tcode2 = []
+    virtual_tables = {}
+    for tt in tcode:
+        tstat = SCRIPT_TABLE_ERROR
+        #
+        if len(tt) < 2:
+            continue
+        #
+        tcols = tt[1:]
+        tcols = [x for x in tcols if isinstance(x, list)]
+        tcols = [x for x in tcols if len(x) >= SCRIPT_TABLE_COLUMN_LEN]
+        if not tcols:
+            continue
+        #
+        tcols = [x for x in tcols if validfname(x[0])]
+        tcols = [x for x in tcols if str(x[1]) in ttypes]
+        tcols = [x for x in tcols if x[2] in tpk]
+        if not tcols:
+            continue
+        #
+        tname = tt[0]
+        if not validfname(tname):
+            continue
+        #
+        ncols = []
+        xxcols = []
+        if not tname in tables():
+            tstat = SCRIPT_TABLE_OK
+            ncols = tcols
+        else:
+            tstat = SCRIPT_TABLE_EXISTS
+            #
+            conflict = False
+            ecolz = {}
+            for z in columns(tname):
+                ecolz[z.get('name').lower()] = z.get('type').lower()
+            #
+            ecols = columns(tname, True)
+            ecols = [x.lower() for x in ecols]
+            for n in tcols:
+                if not n[0].lower() in ecols:
+                    ncols.append(n)
+                else:
+                    nl0 = n[0].lower()
+                    nl1 = n[1].lower()
+                    if nl1 != ecolz.get(nl0):
+                        conflict = True
+                        xxcols.append(n)
+            #
+            if conflict:
+                ncols = tcols
+                tstat = SCRIPT_TABLE_COLUMN_CONFLICT
+        #
+        if not ncols:
+            continue
+        #
+        ttemp = [tname, tstat, tcols, ncols, xxcols]
+        tcode2.append(ttemp)
+        #
+        try:
+            tnamel = tname.lower()
+            if not virtual_tables.has_key(tnamel):
+                virtual_tables[tnamel] = []
+            for n in ncols:
+                vt = {
+                        'name': n[0], 
+                        'type': n[1],
+                    }
+                vtt = virtual_tables.get(tnamel, [])
+                vtt.append(vt)
+                virtual_tables[tnamel] = vtt
+        except:
+            pass
+        #
+    ret[SCRIPT_KEY_TABLES] = tcode2
+    #
+    tcode = e.get(SCRIPT_KEY_FORMS, [])
+    if not isinstance(tcode, list):
+        tcode = []
+    tcode2 = []
+    for tt in tcode:
+        tstat = SCRIPT_FORM_ERROR
+        #
+        if len(tt) < 2:
+            continue
+        #
+        tname = tt[0]
+        tcont = tt[1]
+        #
+        if not validfname(tname):
+            continue
+        #
+        tname = tname.strip().lower()
+        #
+        if not isinstance(tcont, dict):
+            continue
+        #
+        parsed = parseform(copy.deepcopy(tcont), virtual=virtual_tables, execute_sql=False)
+        if not xreqparsed(parsed, FORM_REQ_X):
+            continue
+        #
+        if not tname in forms():
+            tstat = SCRIPT_FORM_OK
+        else:
+            tstat = SCRIPT_FORM_EXISTS
+        #
+        jcont = ''
+        try:
+            jcont = json.dumps(tcont, indent=JSON_INDENT)
+        except:
+            pass
+        #
+        ttemp = [tname, tstat, tcont, jcont]
+        tcode2.append(ttemp)
+    ret[SCRIPT_KEY_FORMS] = tcode2            
+    #
+    tcode = e.get(SCRIPT_KEY_REPORTS, [])
+    if not isinstance(tcode, list):
+        tcode = []
+    tcode2 = []
+    for tt in tcode:
+        tstat = SCRIPT_REPORT_ERROR
+        #
+        if len(tt) < 2:
+            continue
+        #
+        tname = tt[0]
+        tcont = tt[1]
+        #
+        if not validfname(tname):
+            continue
+        #
+        tname = tname.strip().lower()
+        #
+        if not isinstance(tcont, dict):
+            continue
+        #
+        parsed = parsereport(copy.deepcopy(tcont), execute_sql=False)
+        if not xreqparsed(parsed, REPORT_REQ_X):
+            continue
+        #
+        if not tname in reports():
+            tstat = SCRIPT_REPORT_OK
+        else:
+            tstat = SCRIPT_REPORT_EXISTS
+        #
+        jcont = ''
+        try:
+            jcont = json.dumps(tcont, indent=JSON_INDENT)
+        except:
+            pass
+        #        
+        ttemp = [tname, tstat, tcont, jcont]
+        tcode2.append(ttemp)
+    ret[SCRIPT_KEY_REPORTS] = tcode2            
+    #
+    tcode = e.get(SCRIPT_KEY_PROFILES, [])
+    if not isinstance(tcode, list):
+        tcode = []
+    tcode2 = []
+    for tt in tcode:
+        if not isinstance(tt, list):
+            continue
+        if len(tt) != PROFILE_USER_DEFINED_LEN:
+            continue
+        if not isstr(tt[0]):
+            continue
+        if not validfname(tt[0]):
+            continue
+        #
+        ttemp = tt
+        tcode2.append(ttemp)
+    ret[SCRIPT_KEY_PROFILES] = tcode2
+    #
+    for k in e.keys():
+        if not ret.has_key(k):
+            ret[k] = e.get(k)
+    #
+    return ret
+
+def xokscript(pscript):
+    ret = False
+    #
+    if not isinstance(pscript, dict):
+        return ret
+    #
+    if not pscript:
+        return ret
+    #
+    tables = pscript.get(SCRIPT_KEY_TABLES, [])
+    forms = pscript.get(SCRIPT_KEY_FORMS, [])
+    reports = pscript.get(SCRIPT_KEY_REPORTS, [])
+    #
+    if not tables and not forms and not reports:
+        return ret
+    #
+    errors = 0
+    #
+    alls = [tables, forms, reports]
+    for a in alls:
+        if not isinstance(a, list):
+            errors += 1
+            continue                
+        #
+        for i in a:
+            if not isinstance(i, list):
+                errors += 1
+                continue                
+            #
+            if not len(i) > 2: #check: xparsescript, dirty, at least
+                errors += 1
+                continue
+            #
+            if i[1] < 0: #negative, error
+                errors += 1
+    #
+    if errors:
+        return ret
+    #
+    return True
+
+def s_isold():
+    ret = False
+    #
+    if isnosb():
+        return ret
+    #
+    cols = columns(FORM_TBL, True)
+    #
+    for r in FORM_FIELDS_R1:
+        if not r in cols:
+            ret = True
+            break
+    #
+    return ret
+    
+def s_xupdate():
+    allt = tables()
+    while True:
+        newtbl = '%s_%s' %(FORM_TBL, random.randint(0, 100000))
+        if not newtbl in allt:
+            break
+    #
+    ret = 0
+    rows = ret
+    #
+    #
+    try:
+        q = s_init_q(newtbl)
+        db.query(q)
+    except:
+        return ret
+    #
+    try:
+        cols = columns(FORM_TBL, True)
+        q = '''
+                insert into %s(%s) select %s from %s
+            ''' %(
+                newtbl,
+                ','.join(cols),
+                ','.join(cols),
+                FORM_TBL,
+            )
+        rows = db.query(q)
+    except:
+        return ret
+    #
+    try:
+        q = 'drop table %s' %(FORM_TBL)
+        db.query(q)
+    except:
+        return ret
+    #
+    try:
+        q = 'alter table %s rename to %s' %(newtbl, FORM_TBL)
+        db.query(q)
+    except:
+        return ret
+    #
+    ret = rows
+    return ret
+
+def p_pragma(pragma, default=''):
+    ret = default
+    #
+    try:
+        r = db.query('pragma $pragma', 
+                vars={
+                        'pragma': web.sqlliteral(pragma),
+                    }
+            ).list()
+        ret = r[0].get(pragma)
+    except:
+        pass
+    #
+    return ret
+
+def scmdx_path(f):
+    ret = ''
+    #
+    try:
+        f = os.path.basename(f)
+        f = os.path.join(SCURDIR, f)
+        f = os.path.abspath(f)
+        ret = f
+    except:
+        return ret
+    #
+    return ret
+
+def scmd_favicon(data):
+    ret = ''
+    #
+    try:
+        cmd = data[0]
+        #
+        out = data[1]
+        out = scmdx_path(out)
+        #
+        if os.path.exists(out):
+            raise Exception
+        #
+        f = open(out, 'wb')
+        f.write(favicon())
+        f.close()
+        #
+        ret = out
+    except:
+        return ret
+    #
+    return ret
+
+def scmd_pyinstaller(data):
+    #
+    import xmlrpclib
+    #
+    ret = ''
+    #
+    try:
+        cmd = data[0]
+        #
+        out = data[1]
+        out = scmdx_path(out)
+        #
+        ico = data[2]
+        ico = scmdx_path(ico)
+        #
+        tpl = string.Template(PYINSTALLER_SPEC)
+        tplo = tpl.substitute(tpl, 
+                title=TITLE,
+                command=cmd,
+                source=URL_SOURCE[2],
+                readme=URL_README[2],
+                source_path=os.path.join(CURDIR, URL_SOURCE[2]),
+                readme_path=os.path.join(CURDIR, URL_README[2]),
+                output=DEFAULT_WIN_EXE,
+                icon=ico,
+                output_md5=DEFAULT_WIN_MD5,
+                output_version=DEFAULT_WIN_EXE_VERSION,
+                datetime=sqliteboy_time3(sqliteboy_time())
+            )
+        #
+        if os.path.exists(out):
+            raise Exception        
+        #
+        if not os.path.exists(ico):
+            raise Exception
+        #
+        f = open(out, 'wb')
+        f.write(tplo)
+        f.close()
+        #
+        ret = out
+    except:
+        return ret
+    #
+    return ret
+
+def scmd_build(data):
+    ret = ''
+    #
+    try:
+        cmd = data[0]
+        #
+        d3 = ['generate_version', DEFAULT_VERSION]
+        r3 = scmd_version(d3)
+        #
+        d1 = ['generate_favicon', DEFAULT_FAVICON]
+        r1 = scmd_favicon(d1)
+        #
+        d2 = ['generate_pyinstaller', DEFAULT_SPEC, r1]
+        r2 = scmd_pyinstaller(d2)
+        #
+        ret = '%s %s %s' %(r3, r1, r2)
+        ret = ret.strip()
+    except:
+        return ret
+    #
+    return ret
+    
+def scmd_version(data):
+    ret = ''
+    #
+    try:
+        cmd = data[0]
+        #
+        out = data[1]
+        out = scmdx_path(out)
+        #
+        tpl = string.Template(VERSION_SPEC)
+        tplo = tpl.substitute(tpl, 
+                title=TITLE,
+                command=cmd,                
+                datetime=sqliteboy_time3(sqliteboy_time())
+            )        
+        #
+        if os.path.exists(out):
+            raise Exception
+        #
+        f = open(out, 'wb')
+        f.write(tplo)
+        f.close()
+        #
+        ret = out
+    except:
+        return ret
+    #
+    return ret
+
+def shortcut(t, name):
+    ret = False
+    #
+    t = str(t).strip().lower()
+    name = str(name).strip().lower()
+    #
+    if not t in SHORTCUT_ALL:
+        return ret
+    #
+    if not validfname(name):
+        return ret
+    #
+    alls = []
+    if t == SHORTCUT_TYPE_FORM:
+        alls = forms()
+    elif t == SHORTCUT_TYPE_REPORT:
+        alls = reports()
+    if not name in alls:
+        return ret
+    #
+    q = 'my.shortcuts.%s.%s.%s' %(
+                                user(),
+                                name,
+                                t,
+                            )
+    allq = s_select(q)
+    #
+    if not allq:
+        try:
+            r = db.insert(FORM_TBL,
+                        a='my',
+                        b='shortcuts',
+                        c=user(),
+                        d=name,
+                        e=t
+                )
+            ret = True
+        except:
+            return ret
+    else:
+        try:
+            r = db.delete(FORM_TBL,
+                        where='a=$a and b=$b and c=$c and d=$d and e=$e',
+                        vars={
+                                'a': 'my',
+                                'b': 'shortcuts',
+                                'c': user(),
+                                'd': name,
+                                'e': t,
+                            }
+                )
+            ret = True
+        except:
+            return ret
+    #
+    return ret
+
+def r_shortcuts():
+    q = 'my.shortcuts.%s' %(user())
+    res = s_select(q)
+    #
+    sform = []
+    sreport = []
+    #
+    for i in res:
+        t = i.get('e')
+        n = i.get('d')
+        if not t or not n:
+            continue
+        #
+        if not isstr(t) or not isstr(n):
+            continue
+        #
+        n = n.strip().lower()
+        if t == SHORTCUT_TYPE_FORM:
+            sform.append(n)
+        elif t == SHORTCUT_TYPE_REPORT:
+            sreport.append(n)
+    #
+    ret = {
+            SHORTCUT_TYPE_FORM: sform,
+            SHORTCUT_TYPE_REPORT: sreport,
+            }
+    #
+    return ret
+
+def u_print(inp, data):
+    if not isinstance(data, dict):
+        return data
+    #
+    if not hasattr(inp, 'has_key'):
+        return data
+    #
+    if inp.has_key(PRINT_DATA_KEY):
+        data[PRINT_DATA_KEY] = PRINT_DATA_VALUE
+    #
+    return data
+
+def c_db_static(db):
+    ret = False
+    #
+    db = os.path.abspath(db)
+    dirn = os.path.dirname(db)
+    dirn = os.path.basename(dirn)
+    dirn = str(dirn).lower()
+    #
+    if dirn in DEFAULT_WEBPY_STATIC:
+        ret = True
+    #
+    return ret
+
+def pr_user(default, x):
+    ret = default
+    if x:
+        ret = x
+    #
+    return ret
+
+def pr_style(default, x):
+    ret = PROFILE_ITEM_STYLE[default]
+    #
+    if x < len(PROFILE_ITEM_STYLE):
+        ret = PROFILE_ITEM_STYLE[x]
+    #
+    return ret
+
+def pr_all(execute_sql=True, usr=None):
+    ret = []
+    #
+    if isnosb() or usr == '':
+        res = []
+        upr = ''
+    else:
+        if usr is None:
+            usr = user()
+        res = s_select('user.account..%s' %(usr))
+        upr = r_system('users.profile.')
+    #
+    try:
+        if len(res) != 1:
+            raise Exception
+        #
+        res = res[0]
+        g0 = res.get('g')
+        g = json.loads(g0)
+    except:
+        g = {}
+    #
+    upr1 = []
+    try:
+        upr1 = json.loads(upr)
+        if not isinstance(upr1, list):
+            raise Exception
+    except:
+        upr1 = []
+    #
+    upr2 = []
+    upr2a = []
+    spr = [x[0] for x in PROFILE_ALL]
+    for i in upr1:
+        if not isinstance(i, list):
+            continue
+        if not len(i) == PROFILE_USER_DEFINED_LEN:
+            continue
+        #
+        name = str(i[0]).strip().lower()
+        label = str(i[1])
+        if not validfname(name):
+            continue
+        if name in spr:
+            continue
+        if name in upr2a:
+            continue
+        #
+        data = [ 
+                    name, 
+                    label, 
+                    i[2], 
+                    i[3], 
+                    PROFILE_USER_DEFINED_HANDLER,
+                    PROFILE_USER_DEFINED_TYPE,
+                    PROFILE_USER_DEFINED_LEVEL,
+                ]
+        upr2.append(data)
+        upr2a.append(name)
+    #
+    pall = PROFILE_ALL + upr2
+    for i in pall:
+        name = i[0]
+        label = i[1]
+        value = fref(i[2], execute_sql, name)
+        func = i[5]
+        #
+        dflt = i[3]
+        if g.has_key(name):
+            dflt = g.get(name)
+        dflt = func(dflt)
+        #
+        check = globals().get(i[4])
+        rcheck = check(i[3], dflt)
+        #
+        level = i[6]
+        if level == PROFILE_USER_DEFINED_LEVEL:
+            if isinstance(value, list):
+                uvalue = []
+                for v in value:
+                    if isinstance(v, list):
+                        uv = []
+                        for iv in v:
+                            if iv is not None: 
+                                ivv = PROFILE_USER_DEFINED_TYPE(iv)
+                            else:
+                                ivv = ''
+                            uv.append(ivv)
+                        uvalue.append(uv)
+                value = uvalue
+        #
+        value2 = fref2(value, name)
+        if value2:
+            try:
+                value2.set_value(dflt)
+            except:
+                pass        
+        #
+        data = [name, label, value, dflt, rcheck, value2, func, level]
+        ret.append(data)
+    #
+    return ret
+
+def pr_get0(name, usr):
+    ret = None
+    #
+    res = pr_all(False, usr)
+    for i in res:
+        if i[0] == name:
+            ret = i[4]
+            break
+    #
+    return ret
+    
+def pr_get(name):
+    return pr_get0(name, user())
+
+def pr_sys_get0(name, usr):
+    ret = ''
+    name = str(name).strip()
+    usr = str(usr).strip()
+    #
+    if isnosb() or usr == '':
+        return ret
+    #
+    spr = [x[0] for x in PROFILE_ALL]
+    if not name in spr:
+        return ret
+    #
+    res = s_select('user.account..%s' %(usr))
+    try:
+        if len(res) != 1:
+            raise Exception
+        #
+        res = res[0]
+        g0 = res.get('g')
+        g = json.loads(g0)
+    except:
+        g = {}    
+    #
+    ret = g.get(name, '')
+    #
+    return ret
+
+def v_set(name, value):
+    ret = 0
+    #
+    if not isstr(name):
+        return ret
+    name = name.strip().lower()
+    if not name:
+        return ret
+    if not validfname(name):
+        return ret
+    #
+    u = user()
+    #
+    if not sess.var.has_key(u):
+        sess.var[u] = {}
+    if not isinstance(sess.var.get(u), dict):
+        sess.var[u] = {}
+    #
+    su = sess.var.get(u)
+    ku = []
+    try:
+        ku = su.keys()
+    except:
+        pass
+    #
+    lku = len(ku)
+    if name in ku:
+        lku -= 1
+    if lku >= ENV_VAR_MAX:
+        return ret
+    #
+    su[name] = value
+    ret = 1
+    #
+    return ret
+    
+def v_get(name):
+    ret = ''
+    #
+    try:
+        u = user()
+        name = name.strip().lower()
+        ret = sess.var.get(u).get(name)
+    except:
+        pass
+    #
+    return ret
+    
+def v_del(name):
+    ret = 0
+    #
+    try:
+        u = user()
+        name = name.strip().lower()
+        del sess.var.get(u)[name]
+        ret = 1
+    except:
+        pass
+    #
+    return ret
+
+def py_o(name, func, prefix):
+    ret = ''
+    #
+    if not isstr(name) or not isstr(prefix):
+        return ret
+    if not callable(func):
+        return ret
+    #
+    name = name.strip()
+    if not name in func():
+        return ret
+    #
+    ret = '%s%s' %(prefix, name)
+    return ret
+    
+def py_f(name):
+    return py_o(name, forms, DEFAULT_PY_FORM)
+
+def py_r(name):
+    return py_o(name, reports, DEFAULT_PY_REPORT)
+
+def py_handler(name):
+    ret = None
+    #
+    m = None
+    #
+    try:
+        m = __import__(DEFAULT_PY_HANDLER)
+        reload(m)
+    except:
+        return ret
+    #
+    if m:
+        if hasattr(m, name):
+            res = getattr(m, name)
+            if callable(res):
+                ret = res
+    #
+    return ret
+
+def r_schema(table):
+    ret = ''
+    #
+    try:
+        r = db.select(DEFAULT_TABLE, 
+                        what='sql', 
+                        where=" type='table' and tbl_name=$tbl_name",
+                        vars={
+                                'tbl_name': table,
+                            }
+            )
+        ret = r[0].sql
+    except:
+        pass
+    #
+    return ret
+
+def r_messages(category):
+    ret = ''
+    #
+    if isnosb():
+        return ret
+    #
+    category = str(category).strip().lower()
+    if hasws(category) or not category:
+        return ret
+    #
+    try:
+        q = 'messages.%s.' %(category)
+        ret = r_system(q)
+    except:
+        pass
+    #
+    return ret
+
+def r_messages_all():
+    return tr_page(r_messages('all')).strip()
+
+def r_application_title():
+    ret = ''
+    #
+    if not isnosb():
+        try:
+            q = 'application.title.'
+            ret = r_system(q).strip()[:APPLICATION_TITLE_MAX]
+        except:
+            pass
+    #
+    return ret
+
+def uquery(content):
+    ret = ''
+    #
+    try:
+        lret = []
+        for k in content.keys():
+            v = content.get(k)
+            if isstr(v):
+                kv = '%s=%s' %(k, web.urlquote(v))
+                lret.append(kv)
+        #
+        ret_test = ''
+        if lret:
+            ret_test = '&'.join(lret)
+        #
+        if len(ret_test) > QUERY_STRING_MAX:
+            raise Exception
+        #
+        ret = ret_test
+    except:
+        pass
+    #
+    return ret
+
+def rpt_csv(data, content):
+    
+    def header_footer(hf):
+        ret = []
+        #
+        for row in hf:
+            temp = []
+            for col in row:
+                ccont = col.get('content', '')
+                temp.append(ccont)
+            ret.append(temp)   
+        #
+        return ret
+    #
+    export = []
+    #
+    headers = data.get(REPORT_KEY_HEADERS)
+    headers_export = header_footer(headers)
+    export.extend(headers_export)
+    #
+    export.append([])
+    #
+    if data['table']:
+        ctr = 0
+        keys = []
+        for row in content:
+            temp = []
+            if ctr == 0:
+                if not data[REPORT_KEY_HEADER]:
+                    keys = row.keys()
+                else:
+                    keys = data[REPORT_KEY_HEADER]
+                for k in keys:
+                    temp.append(k)
+                export.append(temp)
+            #
+            temp = []
+            for k in keys:
+                rk = row.get(k, '')
+                if isblob(rk):
+                    rk = _['z_view_blob']
+                else:
+                    if rk:
+                        rk = str(rk)
+                    else:
+                        rk = ''
+                temp.append(rk)
+            export.append(temp)
+            #
+            ctr = ctr + 1
+    #
+    export.append([])
+    #
+    footers = data.get(REPORT_KEY_FOOTERS)
+    footers_export = header_footer(footers)
+    export.extend(footers_export)
+    #    
+    fout = cStringIO.StringIO()
+    writer = csv.writer(fout)
+    writer.writerows(export)
+    ret = fout.getvalue()
+    #
+    return ret
+
+def rpt_pdf(data, content, parsed):
+    
+    def header_footer(hf):
+        ret = []
+        #
+        for row in hf:
+            temp = []
+            for col in row:
+                ccont = col.get('content', '')
+                cattr = col.get('data', '')
+                ccont2 = PDF_PARAGRAPH(tr_newline(ccont), PDF_DEFAULT_PARAGRAPH_STYLE)
+                #
+                if cattr.get('type') == REPORT_CELL_TYPE_FILES_IMAGE:
+                    if r_fs_ok(ccont):
+                        ccont_img = r_fs_content(ccont)[2]
+                        ccont_fimg = cStringIO.StringIO(ccont_img)
+                        ccont2 = PDF_IMAGE(ccont_fimg)
+                #
+                temp.append(ccont2)
+            ret.append(temp)   
+        #
+        return ret
+    #
+    spacer = PDF_SPACER(
+                            PDF_DEFAULT_SPACER_WIDTH,
+                            PDF_DEFAULT_SPACER_HEIGHT
+                        )
+    #
+    export = []
+    #
+    headers = data.get(REPORT_KEY_HEADERS)
+    headers_export = header_footer(headers)
+    headers_export_table = PDF_TABLE(
+                                        headers_export,
+                                        style=PDF_DEFAULT_BORDER_STYLE
+                                    )
+    export.append(headers_export_table)
+    #
+    export.append(spacer)
+    #
+    if data['table']:
+        dalign = data['align']
+        keys_header = False
+        #
+        content_export = []
+        #
+        ctr = 0
+        keys = []
+        for row in content:
+            temp = []
+            if ctr == 0:
+                if not data[REPORT_KEY_HEADER]:
+                    keys = row.keys()
+                else:
+                    keys = data[REPORT_KEY_HEADER]
+                    keys_header = True
+                for k in keys:
+                    k = PDF_PARAGRAPH(tr_newline(k), PDF_DEFAULT_PARAGRAPH_STYLE)
+                    temp.append(k)
+                content_export.append(temp)
+            #
+            temp = []
+            for k in keys:
+                rk = row.get(k, '')
+                if isblob(rk):
+                    rk = _['z_view_blob']
+                else:
+                    if rk:
+                        rk = str(rk)
+                    else:
+                        rk = ''
+                #
+                xprstyle = copy.deepcopy(PDF_DEFAULT_PARAGRAPH_STYLE)
+                xprstyle.alignment = PDF_TA_LEFT
+                if keys_header:
+                    dalignk = dalign.get(k)
+                    ralign = style_align_pdf.get(dalignk)
+                    xprstyle.alignment = ralign
+                rk = PDF_PARAGRAPH(tr_newline(rk), xprstyle)
+                temp.append(rk)
+            content_export.append(temp)
+            #
+            ctr = ctr + 1
+        #
+        if content_export:
+            content_export_table = PDF_TABLE(
+                                                content_export,
+                                                style=PDF_DEFAULT_BORDER_STYLE
+                                            )
+            export.append(content_export_table)
+    #
+    export.append(spacer)
+    #
+    footers = data.get(REPORT_KEY_FOOTERS)
+    footers_export = header_footer(footers)
+    footers_export_table = PDF_TABLE(
+                                        footers_export,
+                                        style=PDF_DEFAULT_BORDER_STYLE
+                                    )    
+    export.append(footers_export_table)
+    #    
+    upaper = parsed[8]
+    umargins = parsed[9]
+    upaper2 = PDF_DEFAULT_PAGE_SIZE
+    if upaper:
+        upaper2 = upaper
+    umargins_l = umargins_r = umargins_t = umargins_b = PDF_UNIT_INCH
+    if umargins:
+        umargins_l, umargins_r, umargins_t, umargins_b = umargins
+    #
+    fout = cStringIO.StringIO()
+    writer = PDF_TEMPLATE(
+                            fout,
+                            pagesize=upaper2,
+                            leftMargin=umargins_l,
+                            rightMargin=umargins_r,
+                            topMargin=umargins_t,
+                            bottomMargin=umargins_b
+                        )
+    writer.title = data.get('report', '')
+    writer.subject = writer.title
+    writer.creator = '%s - %s'%(TITLE, sqliteboy_time3a())
+    writer.author = user()
+    writer.build(export)
+    ret = fout.getvalue()
+    #
+    return ret    
+    
     
 #----------------------------------------------------------------------#
 # SQLITE UDF (2)                                                       #
@@ -2356,58 +5648,78 @@ def sqliteboy_x_user():
         return user()
 SQLITE_UDF.append(('sqliteboy_x_user', 0, sqliteboy_x_user))
 
+def sqliteboy_x_profile_all(u, field, system):
+    ret = ''
+    #
+    u = str(u)
+    field = str(field)
+    if not sqliteboy_is_integer(system):
+        system = 0
+    #
+    if isnosb(): 
+        return ret
+    #
+    if system == 1:
+        func = pr_sys_get0
+    else:
+        func = pr_get0
+    #
+    try:
+        ret = func(field, u)
+    except:
+        return ret
+    #
+    return ret
+SQLITE_UDF.append(('sqliteboy_x_profile_all', 3, sqliteboy_x_profile_all))
+
+def sqliteboy_x_profile(u, field):
+    return sqliteboy_x_profile_all(u, field, 0)
+SQLITE_UDF.append(('sqliteboy_x_profile', 2, sqliteboy_x_profile))
+
+def sqliteboy_x_profile_system(u, field):
+    return sqliteboy_x_profile_all(u, field, 1)
+SQLITE_UDF.append(('sqliteboy_x_profile_system', 2, sqliteboy_x_profile_system))
+
+def sqliteboy_x_my(field):
+    return sqliteboy_x_profile(sqliteboy_x_user(), field)
+SQLITE_UDF.append(('sqliteboy_x_my', 1, sqliteboy_x_my))
+
+def sqliteboy_x_my_system(field):
+    return sqliteboy_x_profile_system(sqliteboy_x_user(), field)
+SQLITE_UDF.append(('sqliteboy_x_my_system', 1, sqliteboy_x_my_system))
+
+
+#----------------------------------------------------------------------#
+# PYTHON HANDLER                                                       #
+#----------------------------------------------------------------------#
+py_handler_udf = {}
+for i in SQLITE_UDF:
+    py_handler_udf[ i[0] ] = i[2]
+#
+PY_HANDLER_DATA = {
+                    'udf': py_handler_udf,
+                }
+
 
 #----------------------------------------------------------------------#
 # TEMPLATE                                                             #
 #----------------------------------------------------------------------#
-T_BASE = '''$def with (data, content)
+T_BASE = DEFAULT_T_BASE_HEADER + '''
+$ pr_get_style = pr_get('style')
 <!DOCTYPE html>
 <html>
 <head>
 <link rel='SHORTCUT ICON' href='/favicon.ico'>
 <title>$title(data['title'], '')</title>
 <meta charset='utf-8'>
-<style>
-*
-{
-    font-family     : Courier;
-    font-size       : 12pt;
-}
-table
-{
-    border-collapse : collapse;
-    width           : 100%;
-}
-td
-{
-    border          : 1px solid grey;
-    padding         : 2px;
-}
-th
-{
-    background-color: #406080;
-    border          : 1px solid grey;
-    padding         : 2px;
-    color           : white;
-}
-th a
-{
-    color           : white;
-    text-decoration : none;
-}
-tr:nth-child(odd)
-{
-    background-color: #cccccc;
-}
-tr:nth-child(even)
-{
-    background-color: #eeeeee;
-}
-select
-{
-    width           : 95%;
-}
-</style>
+$if data.has_key(print_data_key):
+    <style>
+    $pr_get_style[0]
+    </style>    
+$else:    
+    <style>
+    $pr_get_style[1]    
+    </style>
 <script>
 function toggle(src, dst)
 {
@@ -2421,12 +5733,22 @@ function toggle(src, dst)
 </head>
 <body>
 
-<table>
+$ r_app_title = r_application_title()
+
+<div class='main_menu'>
+<table class='nohover'>
 <tr>
-<td>$title(data['title'])</td>
+<td>
+$if r_app_title:
+    $r_app_title
+    <br>
+    <br>
+$:title(data['title'])
+</td>
 <td align='right' width='25%'>
 $if user():
     $user() <a href='/password'>$_['cmd_password']</a>
+    <a href='/profile'>$_['cmd_profile']</a> 
     <a href='/files'>$_['cmd_files']</a> 
     <a href='/notes'>$_['cmd_notes']</a> 
     <a href='/pages'>$_['cmd_pages']</a> 
@@ -2456,36 +5778,47 @@ $else:
 <td colspan='4'>
 $for i in menugen():
     <form action='$i[0]' method='$i[1]'>
-    <table>
+    <table class='nohover'>
     <tr>
     <td width='12%'>
     $i[2].capitalize()
     </td>
-    <td width='25%'>
-    $if i[0] == '/table/action':
-        $if data.has_key('table'):
-            $i[3].set_value(data['table'])
-    $elif i[0] == '/form/action':
-        $if data.has_key('form'):
-            $i[3].set_value(data['form'])
-    $elif i[0] == '/report/action':
-        $if data.has_key('report'):
-            $i[3].set_value(data['report'])
-    $i[3].render()
-    </td>
-    <td>
-    $for j in i[4]:
-        <input type='submit' name='$j[0]' value='$j[1]'>
-    </td>
+    $if len(i) == 6:
+        <td colspan='2'>
+        $if i[5]:
+            $for i5 in i[5]:
+                <a href='$i[0]/$i5'>$i5</a>&nbsp;
+        </td>
+    $else:
+        <td width='25%'>
+        $if i[0] == '/table/action':
+            $if data.has_key('table'):
+                $i[3].set_value(data['table'])
+        $elif i[0] == '/form/action':
+            $if data.has_key('form'):
+                $i[3].set_value(data['form'])
+        $elif i[0] == '/report/action':
+            $if data.has_key('report'):
+                $i[3].set_value(data['report'])
+        $if i[3]:
+            $:i[3].render()
+        </td>
+        <td>
+        $for j in i[4]:
+            <input type='submit' name='$j[0]' value='$j[1]'>
+        </td>
     </tr>
     </table>
     </form>
 </td>
 </tr>
 </table>
+</div>
 
 <br>
 $if data['command'] == 'browse':
+    $ rows = data['rows']
+
     <form action="$data['action_url']" method="$data['action_method']">
     $ hkey = data['hidden_key']
     <input type='hidden' name="$hkey" value="$data[hkey]">
@@ -2495,7 +5828,41 @@ $if data['command'] == 'browse':
         $else:
             <input type='$b[4]' name='$b[0]' value='$b[1]'>
     <br><br>
+    $if data['limit']: 
+        $_['x_page'] $data['page'], $_['x_limit'] $data['limit'], $rows $_['x_row'], $len(data['selected']) $_['x_selected']
+        <br>
+        $_['x_limit']: 
+        $for l in data['browse_limit']:
+            $if l == data['limit']:
+                $l
+            $else:
+                <a href="$data['url']?$data['ksort']=$data['input_sort']&$data['korder']=$data['input_order']&$data['klimit']=$l&$data['kpage']=$data['page']&pages=$data['input_pages']">$l</a>
+            &nbsp;
+        <a href="$data['url']?$data['ksort']=$data['input_sort']&$data['korder']=$data['input_order']&$data['klimit']=0&pages=$data['input_pages']">$_['x_unlimited']</a>
+        <br>
+        $_['x_page']:
+        $if data['input_pages'] == '1':
+            <a href="$data['url']?$data['ksort']=$data['input_sort']&$data['korder']=$data['input_order']&$data['klimit']=$data['limit']&$data['kpage']=$data['page']&pages=0">$_['cmd_hide']</a>
+        $else:
+            <a href="$data['url']?$data['ksort']=$data['input_sort']&$data['korder']=$data['input_order']&$data['klimit']=$data['limit']&$data['kpage']=$data['page']&pages=1">$_['cmd_show']</a>
+        |
+        <a href="$data['url']?$data['ksort']=$data['input_sort']&$data['korder']=$data['input_order']&$data['klimit']=$data['limit']&$data['kpage']=$data['page_previous']&pages=$data['input_pages']">$_['x_previous']</a>&nbsp;
+        <a href="$data['url']?$data['ksort']=$data['input_sort']&$data['korder']=$data['input_order']&$data['klimit']=$data['limit']&$data['kpage']=$data['page_next']&pages=$data['input_pages']">$_['x_next']</a>&nbsp;
+        $if data['input_pages'] == '1' and data['pages']:
+            |
+            $for p in data['pages']:
+                $if p == data['page']:
+                    $p
+                $else:
+                    <a href="$data['url']?$data['ksort']=$data['input_sort']&$data['korder']=$data['input_order']&$data['klimit']=$data['limit']&$data['kpage']=$p&pages=$data['input_pages']">$p</a>
+                &nbsp;
+    $else:
+        $rows $_['x_row'], $len(data['selected']) $_['x_selected']
+        <br>
+        <a href="$data['url']?$data['ksort']=$data['input_sort']&$data['korder']=$data['input_order']&$data['klimit']=$data['default_limit']&pages=$data['input_pages']">$_['x_page']</a>
+    <br><br>
     <table>
+    <tr>
     <th width='50px'><input type='checkbox' name="$data['select']_all" onclick='toggle(this, "$data['select']");'></th>
     $for c in data['columns']:
         $if c['name'] == data['column']:
@@ -2504,7 +5871,7 @@ $if data['command'] == 'browse':
             $if c['pk']:
                 $pk_sym
             &nbsp;
-            <a href="$data['url']?$data['column_query']">$data['column_vsort']</a>
+            <a href="$data['url']?$data['column_query']&pages=$data['input_pages']">$:data['column_vsort']</a>
             </th>
         $else:
             <th>
@@ -2513,12 +5880,11 @@ $if data['command'] == 'browse':
                 $pk_sym
             &nbsp;
             $for s in range(len(data['sort'])):
-                <a href="$data['url']?$data['ksort']=$data['sort'][s]&$data['klimit']=$data['limit']&$data['korder']=$c['name']">$data['vsort'][s]</a>
+                <a href="$data['url']?$data['ksort']=$data['sort'][s]&$data['klimit']=$data['limit']&$data['kpage']=$data['page']&$data['korder']=$c['name']&pages=$data['input_pages']">$:data['vsort'][s]</a>
             </th>
+    </tr>
     
-    $ rows = 0
     $for x in content:
-        $ rows = rows + 1
         <tr>
         $ rowid = data['rowid']
         <td width='50px' align='center'>
@@ -2529,7 +5895,7 @@ $if data['command'] == 'browse':
         </td>
             $for c in data['columns']:
             <td>
-                $if c['type'] in data['blob_type']:
+                $if c['type'] in data['blob_type'] or isblob(x[c['name']]):
                     $if x[c['name']]:
                         <a href="$data['blob_url']?$data['blob_var']=$x[rowid]&$data['blob_column']=$c['name']">$data['blob_command']</a>
                 $else:
@@ -2537,15 +5903,19 @@ $if data['command'] == 'browse':
             </td>
         </tr>
     </table>
+    
+    <br>
+    $for b in data['action_button']:
+        $if b[2]:
+            <input type='$b[4]' name='$b[0]' value='$b[1]' onclick='return confirm("$b[3].capitalize()");'>
+        $else:
+            <input type='$b[4]' name='$b[0]' value='$b[1]'>
+
     </form>
     <br>
-    $if data['limit']: 
-        $_['x_limit'] $data['limit'], $rows $_['x_row']
-    $else:
-        $rows $_['x_row']
 $elif data['command'] == 'insert':
     <p>
-    <i>$data['hint'].capitalize()</i>
+    <i>$:data['hint'].capitalize()</i>
     </p>
     $if data['message']:
         <div>
@@ -2590,12 +5960,13 @@ $elif data['command'] == 'insert':
     </form>
 $elif data['command'] == 'edit':
     <p>
-    <i>$data['hint'].capitalize()</i>
+    <i>$:data['hint'].capitalize()</i>
     </p>
 
     $ rowid = data['rowid']
     $ msgp = smsgp(data['table'])
     $for x in content:
+        $ blob_on_nonblob = 0
         <a name='$x[rowid]'></a>
         <form action="$data['action_url']" method="$data['action_method']" enctype="$data['action_enctype']">
         $for h in data['hidden']:
@@ -2626,6 +5997,10 @@ $elif data['command'] == 'edit':
                         <a href="$data['blob_url']?$data['blob_var']=$x[rowid]&$data['blob_column']=$c['name']">$data['blob_command']</a>
                         &nbsp;
                     <input type='file' name="$c['name']">
+                $elif  isblob(x[c['name']]):
+                    $ blob_on_nonblob = 1
+                    $if x[c['name']]:
+                        <a href="$data['blob_url']?$data['blob_var']=$x[rowid]&$data['blob_column']=$c['name']">$data['blob_command']</a>
                 $elif c['type'] in data['text_type']:
                     <textarea name="$c['name']" rows=5 style='width:100%;'>$x[c['name']]</textarea>
                 $else:
@@ -2636,11 +6011,14 @@ $elif data['command'] == 'edit':
         <td>&nbsp;</td>
         <td>&nbsp;</td>
         <td>
-        $for b in data['action_button']:
-            $if b[2]:
-                <input type='$b[4]' name='$b[0]' value='$b[1]' onclick='return confirm("$b[3].capitalize()");'>
-            $else:
-                <input type='$b[4]' name='$b[0]' value='$b[1]'>    
+        $if blob_on_nonblob == 1:
+            <i>$_['z_edit_blob_column']</i>
+        $else:
+            $for b in data['action_button']:
+                $if b[2]:
+                    <input type='$b[4]' name='$b[0]' value='$b[1]' onclick='return confirm("$b[3].capitalize()");'>
+                $else:
+                    <input type='$b[4]' name='$b[0]' value='$b[1]'>    
         </td>
         </tr>
         </table>
@@ -2649,7 +6027,7 @@ $elif data['command'] == 'edit':
 $elif data['command'] == 'column':
     <p>
     $ hint = data['hint'][0].upper() + data['hint'][1:]
-    <i>$hint</i>
+    <i>$:hint</i>
     </p>
     $if data['message']:
         <div>
@@ -2659,12 +6037,14 @@ $elif data['command'] == 'column':
     $for h in data['hidden']:
         <input type='hidden' name='$h[0]' value='$h[1]'>
     <table>
+    <tr>
     $for h in data['column_header']:
         <th>
             $h[0]
             $if h[1] == 1:
                 ($_['x_optional'])
         </th>
+    </tr>
     $for c in data['columns']:
         <tr>
         <td>
@@ -2682,7 +6062,7 @@ $elif data['command'] == 'column':
         $for a in data['column_add']:
             <td>
                 $ a.attrs['style'] = 'width: 100%'
-                $a.render()
+                $:a.render()
             </td>
         </tr>
     <tr>
@@ -2698,7 +6078,7 @@ $elif data['command'] == 'column':
     </form>
 $elif data['command'] == 'rename':
     <p>
-    <i>$data['hint'].capitalize()</i>
+    <i>$:data['hint'].capitalize()</i>
     </p>
     $if data['message']:
         <div>
@@ -2726,7 +6106,7 @@ $elif data['command'] == 'rename':
     </form>
 $elif data['command'] == 'drop':
     <p>
-    <i>$data['hint'].capitalize()</i>
+    <i>$:data['hint'].capitalize()</i>
     </p>
     $if data['message']:
         <div>
@@ -2755,7 +6135,7 @@ $elif data['command'] == 'query':
     $else:
         $ query = data['query']
     <p>
-    <i>$data['hint'].capitalize()</i>
+    <i>$:data['hint'].capitalize()</i>
     </p>
     <form action="$data['action_url']" method="$data['action_method']">
     <table>
@@ -2788,9 +6168,11 @@ $elif data['command'] == 'query':
                 $for re in res[3]:
                     $if ctr == 0:
                         $ keys = re.keys()
+                        <tr>
                         $for k in keys:
                             <th>$k
                             </th>
+                        </tr>
                     <tr>
                     $for k in keys:
                         $ rek = re[k]
@@ -2807,7 +6189,7 @@ $elif data['command'] == 'query':
                 $_['x_empty']
 $elif data['command'] == 'create1':
     <p>
-    <i>$data['hint'].capitalize()</i>
+    <i>$:data['hint'].capitalize()</i>
     </p>
     $if data['message']:
         <div>
@@ -2818,7 +6200,7 @@ $elif data['command'] == 'create1':
     $for i in data['input']:
         <tr>
         <td>$i[1]</td>
-        <td>$i[0].render()
+        <td>$:i[0].render()
         </tr>
     <tr>
     <td>&nbsp;</td>
@@ -2837,7 +6219,7 @@ $elif data['command'] == 'create2':
     $ hint = ''
     $if data['hint']:
         $ hint = data['hint'][0].upper() + data['hint'][1:]
-    <i>$hint</i>
+    <i>$:hint</i>
     </p>
     $if data['message']:
         <div>
@@ -2848,18 +6230,20 @@ $elif data['command'] == 'create2':
         <input type='hidden' name='$h[0]' value='$h[1]'>
     $data['table']<br>
     <table>
+    <tr>
     $for h in data['column_header']:
         <th>
             $h[0]
             $if h[1] == 1:
                 ($_['x_optional'])
         </th>
+    </tr>
     $for m in range(data['count']):
         <tr>
         $for a in data['column_add']:
             <td>
                 $ a.attrs['style'] = 'width: 100%'
-                $a.render()
+                $:a.render()
             </td>
         </tr>
     <tr>
@@ -2881,10 +6265,25 @@ $elif data['command'] == 'home':
     $for i in content[1]:
         <tr>
         <td width='20%'>$i[0]</td>
-        <td>$i[1]</td>
+        <td>$:i[1]</td>
         </tr>
     </table>
+    <br>
+    <br>
+    $ r_msg_all = r_messages_all()
+    $if r_msg_all:
+        <div class='messages'>
+            <pre>$:r_msg_all
+            </pre>
+        </div>
 $elif data['command'] in ['readme', 'source']:
+    <br>
+    <br>
+    <a href="$data['download']">$_['cmd_download']</a>
+    <br>
+    <br>
+    $data['size']
+    <br>
     <br>
     <textarea style="width: 100%;" rows=20 readonly>
     $:content
@@ -2899,7 +6298,7 @@ $elif data['command'] == 'login':
     $for i in data['input']:
         <tr>
         <td width='25%'>$i[1]</td>
-        <td>$i[0].render()
+        <td>$:i[0].render()
         </tr>
     <tr>
     <td colspan='2'>
@@ -2922,7 +6321,7 @@ $elif data['command'] == 'password':
     $for i in data['input']:
         <tr>
         <td width='25%'>$i[1]</td>
-        <td>$i[0].render()
+        <td>$:i[0].render()
         </tr>
     <tr>
     <td colspan='2'>
@@ -2937,7 +6336,7 @@ $elif data['command'] == 'password':
     </form>
 $elif data['command'] == 'users':
     <p>
-    <i>$data['hint'].capitalize()</i>
+    <i>$:data['hint'].capitalize()</i>
     </p>
     $if data['message']:
         <div>
@@ -2954,10 +6353,12 @@ $elif data['command'] == 'users':
     <br>
     <br>
     <table>
+    <tr>
     $for i in data['columns']:
         <th>
             $i
         </th>
+    </tr>
     $for u in content:
         <tr>
         <td width='12%' align='center'>
@@ -3004,7 +6405,7 @@ $elif data['command'] == 'users':
     </form>
 $elif data['command'] == 'hosts':
     <p>
-    <i>$data['hint'].capitalize()</i>
+    <i>$:data['hint'].capitalize()</i>
     </p>    
     $if data['message']:
         <div>
@@ -3013,14 +6414,14 @@ $elif data['command'] == 'hosts':
     <form action="$data['action_url']" method="$data['action_method']">
     <table>
     <tr>
-    <td>$data['input_host'].render()
+    <td>$:data['input_host'].render()
     </td>
     </tr>
     <tr>
     <td>
     $ custom = '\\n'.join(data['custom'])
     $data['input_custom'].set_value(custom)
-    $data['input_custom'].render()
+    $:data['input_custom'].render()
     </td>
     </tr>
     <tr>
@@ -3037,7 +6438,7 @@ $elif data['command'] == 'hosts':
 $elif data['command'] == 'form.edit':
     <p>
     $ hint = data['hint'][0].upper() + data['hint'][1:]
-    <i>$hint</i>
+    <i>$:hint</i>
     </p>    
     $if data['message']:
         <div>
@@ -3051,7 +6452,7 @@ $elif data['command'] == 'form.edit':
     $for i in data['input']:
         <tr>
         <td width='15%'>$i[1]</td>
-        <td>$i[0].render()</td>
+        <td>$:i[0].render()</td>
         </tr>
     <tr>
     <td colspan='2'>
@@ -3067,12 +6468,12 @@ $elif data['command'] == 'form.edit':
 $elif data['command'] == 'form.run':
     <p>
     $ hint = data['hint']
-    <i>$hint</i>
+    <i>$:hint</i>
     </p>    
     $if data['message']:
         <div>
             $for m in data['message']:
-                $': '.join(m)<br>
+                $:': '.join(m)<br>
         </div>
     $if data['ftitle']:
         <h3>
@@ -3080,18 +6481,19 @@ $elif data['command'] == 'form.run':
         </h3>
     $if data['finfo']:
         <div>
-            $data['finfo']
+            $:data['finfo']
         </div>
     <form action="$data['action_url']" method="$data['action_method']" enctype="$data['action_enctype']">
     $for h in data['hidden']:
         <input type='hidden' name='$h[0]' value='$h[1]'>
     <table>
     $for i in data['input']:
+        $ ucontent = content.get(i[1], None)
         <tr>
         $ lbl = i[0]
         $if i[4]:
             $ lbl = '<b>' + i[0] + '</b>'
-        <td width='15%'>$lbl</td>
+        <td width='15%'>$:lbl</td>
         <td>
         $ ro = ''
         $if i[3]:
@@ -3099,10 +6501,14 @@ $elif data['command'] == 'form.run':
         
         $ defv = ''
         $if i[5]:
-            $i[5].render()
+            $if ucontent is not None:
+                $i[5].set_value(ucontent)
+            $:i[5].render()
         $else:
             $if i[6]:
                 $ defv = i[6]
+            $if ucontent is not None:
+                $ defv = ucontent
             $if i[2] in data['blob_type']:
                 <input type='file' name="$i[1]"$ro>
             $elif i[2] in data['text_type']:
@@ -3120,9 +6526,11 @@ $elif data['command'] == 'form.run':
         <td colspan='2'>
         $data['sub'][4]
         <table>
+        <tr>
         <th>&nbsp;</th>
         $for sh in subd:
             <th>$sh[1]</th>
+        </tr>
         $for sr in range(subr[0]):
             <tr>
             <td align='right'>
@@ -3134,7 +6542,7 @@ $elif data['command'] == 'form.run':
             $for sh in subd:
                 <td>
                 $if sh[2]:
-                    $sh[2].render()
+                    $:sh[2].render()
                 $else:
                     $ shv = ''
                     $if sh[3]:
@@ -3160,7 +6568,7 @@ $elif data['command'] == 'form.run':
 $elif data['command'] == 'report.edit':
     <p>
     $ hint = data['hint'][0].upper() + data['hint'][1:]
-    <i>$hint</i>
+    <i>$:hint</i>
     </p>    
     $if data['message']:
         <div>
@@ -3174,7 +6582,7 @@ $elif data['command'] == 'report.edit':
     $for i in data['input']:
         <tr>
         <td width='15%'>$i[1]</td>
-        <td>$i[0].render()</td>
+        <td>$:i[0].render()</td>
         </tr>
     <tr>
     <td colspan='2'>
@@ -3190,12 +6598,12 @@ $elif data['command'] == 'report.edit':
 $elif data['command'] == 'report.run':
     <p>
     $ hint = data['hint']
-    <i>$hint</i>
+    <i>$:hint</i>
     </p>    
     $if data['message']:
         <div>
             $for m in data['message']:
-                $': '.join(m)<br>
+                $:': '.join(m)<br>
         </div>
     $if data['ftitle']:
         <h3>
@@ -3203,18 +6611,19 @@ $elif data['command'] == 'report.run':
         </h3>
     $if data['finfo']:
         <div>
-            $data['finfo']
+            $:data['finfo']
         </div>
     <form action="$data['action_url']" method="$data['action_method']" enctype="$data['action_enctype']">
     $for h in data['hidden']:
         <input type='hidden' name='$h[0]' value='$h[1]'>
     <table>
     $for i in data['input']:
+        $ ucontent = content.get(i[1], None)
         <tr>
         $ lbl = i[0]
         $if i[3]:
             $ lbl = '<b>' + i[0] + '</b>'
-        <td width='15%'>$lbl</td>
+        <td width='15%'>$:lbl</td>
         <td>
         $ ro = ''
         $if i[2]:
@@ -3222,10 +6631,14 @@ $elif data['command'] == 'report.run':
         
         $ defv = ''
         $if i[4]:
-            $i[4].render()
+            $if ucontent is not None:
+                $i[4].set_value(ucontent)        
+            $:i[4].render()
         $else:
             $if i[5]:
                 $ defv = i[5]
+            $if ucontent is not None:
+                $ defv = ucontent                
             <input type='text' value='$defv' name="$i[1]" style='width:100%;'$ro>        
         </td>
         </tr>
@@ -3241,25 +6654,36 @@ $elif data['command'] == 'report.run':
     </table>
     </form>
 $elif data['command'] == 'report.run.result':
-    <h3>
-    $data['report2']
-    </h3>
-    $if data['search']:
+    $if data.has_key('headers'):
+        <br>
         <table>
-        $for s in data['search']:
+        $for row in data['headers']:
             <tr>
-            <td width='30%'>
-            $s[0]
-            </td>
-            <td>
-            $s[1]
-            </td>
+            $for col in row:
+                $ ccont = col.get('content', '')
+                $ cattr = col.get('data', {})
+                $ ca_style = cattr.get('style', '')
+                <td>
+                    $if cattr.get('type') == 'files.image':
+                        $if ccont:
+                            $if ca_style:
+                                <img src='/fs?sid=$ccont' style='$ca_style'>
+                            $else:
+                                <img src='/fs?sid=$ccont' border='0'>
+                        $else:
+                            $ccont
+                    $else:    
+                        <span class='pre'>$ccont</span>
+                </td>
             </tr>
         </table>
+        
     <br>
     $ ctr = 0
     $if data['table']:
         $ keys = []
+        $ keys_header = 0
+        $ dalign = data['align']
         <table>
         $for re in content:
             $if ctr == 0:
@@ -3267,29 +6691,56 @@ $elif data['command'] == 'report.run.result':
                     $ keys = re.keys()
                 $else:
                     $ keys = data['header']
+                    $ keys_header = 1
+                <tr>
                 $for k in keys:
-                    <th>$k
+                    <th><span class='pre'>$k</span>
                     </th>
+                </tr>
             <tr>
             $for k in keys:
+                $ ralign = ''
+                $if keys_header:
+                    $ dalignk = dalign.get(k)
+                    $ ralign = style_align_default.get(dalignk)
                 $ rek = re.get(k, '')
                 $if isblob(rek):
-                    <td>$_['z_view_blob']</td>
+                    <td$:ralign><span class='pre'>$_['z_view_blob']</span></td>
                 $else:
-                    <td>$rek
+                    <td$:ralign><span class='pre'>$rek</span>
                     </td>
             </tr>
             $ ctr = ctr + 1
         </table>    
-        $ctr $_['x_row']
-    $else:
-        $if data['result_message']:
-            $data['result_message']
-        $else:
-            $content
+
+    $if data.has_key('footers'):
+        <br>
+        <table>
+        $for row in data['footers']:
+            <tr>
+            $for col in row:
+                $ ccont = col.get('content', '')
+                $ cattr = col.get('data', {})
+                $ ca_style = cattr.get('style', '')
+                <td>
+                    $if cattr.get('type') == 'files.image':
+                        $if ccont:
+                            $if ca_style:
+                                <img src='/fs?sid=$ccont' style='$ca_style'>
+                            $else:
+                                <img src='/fs?sid=$ccont' border='0'>
+                        $else:
+                            $ccont
+                    $else:    
+                        <span class='pre'>$ccont</span>
+                </td>
+            </tr>
+        </table>
+    
+    <br>
 $elif data['command'] == 'notes':
     <p>
-    <i>$data['hint'].capitalize()</i>
+    <i>$:data['hint'].capitalize()</i>
     </p>
     $if data['message']:
         <div>
@@ -3307,6 +6758,7 @@ $elif data['command'] == 'notes':
     <br>
     <br>
     <table>
+    <tr>
     $for i in data['columns']:
         <th>
             $if i == data['select_all']:
@@ -3314,6 +6766,7 @@ $elif data['command'] == 'notes':
             $else:
                 $i
         </th>
+    </tr>
     $for u in content:
         <tr>
         <td width='12%' align='center'>
@@ -3354,7 +6807,7 @@ $elif data['command'] == 'notes':
     </form>
 $elif data['command'] == 'system':
     <p>
-    <i>$data['hint'].capitalize()</i>
+    <i>$:data['hint'].capitalize()</i>
     </p>
     $if data['message']:
         <div>
@@ -3370,10 +6823,12 @@ $elif data['command'] == 'system':
     <br>
     <br>
     <table>
+    <tr>
     $for i in data['columns']:
         <th>
             $i
         </th>
+    </tr>
     $for u in content:
         <tr>
         <td width='20%'>
@@ -3383,14 +6838,17 @@ $elif data['command'] == 'system':
             $u[1]
         </td>
         <td>
-            <input type='text' name='$u[2]' value="$u[3]">
+            $if u[4] == 1:
+                <textarea name='$u[2]' cols='40' rows='10'>$u[3]</textarea>
+            $else:
+                <input type='text' name='$u[2]' value="$u[3]">
         </td>
         </tr>
     </table>
     </form>
 $elif data['command'] == 'files':
     <p>
-    <i>$data['hint'].capitalize()</i>
+    <i>$:data['hint'].capitalize()</i>
     </p>
     $if data['message']:
         <div>
@@ -3408,6 +6866,7 @@ $elif data['command'] == 'files':
     <br>
     <br>
     <table>
+    <tr>
     $for i in data['columns']:
         <th>
             $if i == data['select_all']:
@@ -3415,6 +6874,7 @@ $elif data['command'] == 'files':
             $else:
                 $i
         </th>
+    </tr>
     $for u in content:
         <tr>
         <td width='12%' align='center'>
@@ -3462,7 +6922,7 @@ $elif data['command'] == 'files':
 $elif data['command'] == 'pages':
     <p>
     $ hint = data['hint'][0].upper() + data['hint'][1:]
-    <i>$hint</i>
+    <i>$:hint</i>
     </p>
     $if data['message']:
         <div>
@@ -3481,10 +6941,12 @@ $elif data['command'] == 'pages':
     <br>
     <br>
     <table>
+    <tr>
     $for i in data['columns']:
         <th>
             $i
         </th>
+    </tr>
     <tr>
     <td width='50%' style='vertical-align: top'>
         <textarea name='content' rows='40' cols='40'>$content[0]</textarea>
@@ -3502,6 +6964,18 @@ $elif data['command'] == 'error_404':
         <div>
             $data['message']
         </div>
+$elif data['command'] == 'error_500':
+    $if data['message']:
+        <div>
+            $data['message']
+        </div>
+    <br>
+    <pre>
+    $data['method'] $data['path']
+    <br>
+    $for i in content:
+        $i
+    </pre>
 $elif data['command'] == 'page':
     <pre>$:content</pre>
 $elif data['command'] == 'calculator':
@@ -3512,13 +6986,13 @@ $elif data['command'] == 'calculator':
     $else:
         $ query = data['calculator']
     <p>
-    <i>$data['hint'].capitalize()</i>
+    <i>$:data['hint'].capitalize()</i>
     </p>
     <form action="$data['action_url']" method="$data['action_method']">
     <table>
     <tr>
     <td>
-    <input type='text' name='q' value='$query' maxlength="$data['max_input']" size="$data['max_input']">
+    <input id='qcalculator' type='text' name='q' value='$query' maxlength="$data['max_input']" size="$data['max_input']">
     </td>
     </tr>
     <tr>
@@ -3535,16 +7009,374 @@ $elif data['command'] == 'calculator':
     <br>
     $if res:
         $res[1]<br>
+        <br>
+        $res[0]<br>
+        <br>
         $res[2]
+        <br>
+        $if not res[4]:
+            <a href='#' onclick='javascript:document.getElementById("qcalculator").value="$res[2]"'>$_['cmd_use_result']</a>
+$elif data['command'] == 'scripts':
+    <p>
+    $ hint = data['hint'][0].upper() + data['hint'][1:]
+    <i>$:hint</i>
+    </p>    
+    $if data['message']:
+        <div>
+            $for m in data['message']:
+                $': '.join(m)
+                <br>
+        </div>
+    <form action="$data['action_url']" method="$data['action_method']" enctype="$data['action_enctype']">
+    $for b in data['action_button']:
+        $if b[2]:
+            <input type='$b[4]' name='$b[0]' value='$b[1]' onclick='return confirm("$b[3].capitalize()");'>
+        $else:
+            <input type='$b[4]' name='$b[0]' value='$b[1]'>    
+        &nbsp;
+    <br>
+    <br>
+    <table>
+    <tr>
+    $for i in data['columns']:
+        <th>
+            $i
+        </th>
+    </tr>
+    $for u in content:
+        <tr>
+        <td>
+            <a href="/admin/script/$u['rowid']">$u['name']</a>
+        </td>
+        <td>
+            $u['info']
+        </td>
+        <td>
+            $u['author']
+        </td>
+        <td>
+            $u['license']
+        </td>        
+        <td>
+            $u['f']
+        </td>        
+        </tr>
+    <tr>
+    <td colspan="5">
+        <input type='file' name='d_new'>
+    </td>
+    </tr>
+    </table>
+    </form>
+$elif data['command'] == 'script':
+    <p>
+    <i>$:data['hint'].capitalize()</i>
+    </p>    
+    $if data['message']:
+        <div>
+            $for m in data['message']:
+                $': '.join(m)
+                <br>
+        </div>
+    <form action="$data['action_url']" method="$data['action_method']" enctype="$data['action_enctype']">
+    $for b in data['action_button']:
+        $if b[2]:
+            <input type='$b[4]' name='$b[0]' value='$b[1]' onclick='return confirm("$b[3].capitalize()");'>
+        $else:
+            <input type='$b[4]' name='$b[0]' value='$b[1]'>    
+        &nbsp;
+    <br>
+    <br>
+    <table>
+    <tr>
+    $for i in data['columns']:
+        <th>
+            $i
+        </th>
+    </tr>
+        
+    $for i in data['info']:
+        <tr>
+        <td>$i[0]</td>
+        <td>$content.get(i[1], '')</td>
+        <td>&nbsp;</td>
+        </tr>
+        
+    <tr>
+    <td>$_['x_run_time']</td>
+    <td>$data['run']</td>
+    <td>&nbsp;</td>
+    </tr>
+    
+    $ table_detail = data.get('table_detail', {})
+    $ allx = [ ['tables', _['x_table'], data['table_info']], ['forms', _['x_form'], data['form_info']],  ['reports', _['x_report'], data['report_info']], ['profiles', _['x_profile'], data['profile_info']] ]
+    $for x in allx:
+        $ k = x[0]
+        $ t = x[1]
+        $ c = x[2]
+        $for i in content[k]:
+            <tr>
+            <td width='20%'>$t</td>
+            <td width='30%'>$i[0]</td>
+            <td>
+            $c.get(i[1], '')
+            $if k == 'tables':
+                $ zzz = table_detail.get(i[0], [])
+                $if zzz:
+                    <br>
+                    <br>
+                    <table>
+                    $for zz in zzz:
+                        <tr>
+                            $for z in zz:
+                                <td>
+                                    $z
+                                </td>
+                        </tr>
+                    </table>
+                    <br>
+            </td>
+            </tr>
+    
+    </table>
+    </form>
+    
+    <br>
+    <br>
+    <textarea style="width: 100%;" rows=10 readonly>
+    $data['code']
+    </textarea>
+    <br>
+    <br>
+    
+$elif data['command'] == 'copy':
+    <p>
+    <i>$:data['hint'].capitalize()</i>
+    </p>    
+    $if data['message']:
+        <div>
+            $for m in data['message']:
+                $': '.join(m)
+                <br>
+        </div>
+    <form action="$data['action_url']" method="$data['action_method']" enctype="$data['action_enctype']">
+    $for b in data['action_button']:
+        $if b[2]:
+            <input type='$b[4]' name='$b[0]' value='$b[1]' onclick='return confirm("$b[3].capitalize()");'>
+        $else:
+            <input type='$b[4]' name='$b[0]' value='$b[1]'>    
+        &nbsp;
+    <br>
+    <br>
+    <table>
+        <tr>
+            <td>
+            $_['x_copy_from']
+            </td>
+            <td>
+            $data['table']
+            <input type='hidden' name='table' value='$data["table"]'>
+            </td>            
+        </tr>
+        <tr>
+            <td>
+            $_['x_copy_to']
+            </td>
+            <td>
+            $:data['target'].render()
+            </td>            
+        </tr>
+    </table>
+    </form>
+$elif data['command'] == 'empty':
+    <p>
+    <i>$:data['hint'].capitalize()</i>
+    </p>
+    $if data['message']:
+        <div>
+            $for m in data['message']:
+                $': '.join(m)
+                <br>
+        </div>
+    <form action="$data['action_url']" method="$data['action_method']">
+    $for h in data['hidden']:
+        <input type='hidden' name='$h[0]' value='$h[1]'>
+    <table>
+    <tr>
+    <td>
+    $for b in data['action_button']:
+        $if b[2]:
+            <input type='$b[4]' name='$b[0]' value='$b[1]' onclick='return confirm("$b[3].capitalize()");'>
+        $else:
+            <input type='$b[4]' name='$b[0]' value='$b[1]'>    
+    </td>
+    </tr>
+    </table>
+    </form>
+$elif data['command'] == 'vacuum':
+    <p>
+    <i>$:data['hint'].capitalize()</i>
+    </p>
+    $if data['message']:
+        <div>
+            $for m in data['message']:
+                $': '.join(m)
+                <br>
+        </div>
+    <br>
+    <table>
+    $for i in data['info']:
+        <tr>
+            <td>
+                $i[0]
+            </td>
+            <td>
+                $i[1]
+            </td>
+        </tr>
+    </table>
+    <br>    
+    <form action="$data['action_url']" method="$data['action_method']">
+    $for h in data['hidden']:
+        <input type='hidden' name='$h[0]' value='$h[1]'>
+    <table>
+    <tr>
+    <td>
+    $for b in data['action_button']:
+        $if b[2]:
+            <input type='$b[4]' name='$b[0]' value='$b[1]' onclick='return confirm("$b[3].capitalize()");'>
+        $else:
+            <input type='$b[4]' name='$b[0]' value='$b[1]'>    
+    </td>
+    </tr>
+    </table>
+    </form>
+$elif data['command'] == 'import':
+    <p>
+    <i>$:data['hint'].capitalize()</i>
+    </p>
+    $if data['message']:
+        <div>
+            $for m in data['message']:
+                $': '.join(m)
+                <br>
+        </div>
+    <form action="$data['action_url']" method="$data['action_method']" enctype="$data['action_enctype']">
+    $for h in data['hidden']:
+        <input type='hidden' name='$h[0]' value='$h[1]'>
+    <table>
+    <tr>
+    <td>
+        <input type='file' name='f'>
+    </td>
+    </tr>
+    <tr>
+    <td>
+    $for b in data['action_button']:
+        $if b[2]:
+            <input type='$b[4]' name='$b[0]' value='$b[1]' onclick='return confirm("$b[3].capitalize()");'>
+        $else:
+            <input type='$b[4]' name='$b[0]' value='$b[1]'>    
+    </td>
+    </tr>
+    </table>
+    </form>
+$elif data['command'] == 'profile':
+    <p>
+    <i>$:data['hint'].capitalize()</i>
+    </p>
+    $if data['message']:
+        <div>
+            $for m in data['message']:
+                $': '.join(m)
+                <br>
+        </div>
+    <form action="$data['action_url']" method="$data['action_method']" enctype="$data['action_enctype']">
+    $for b in data['action_button']:
+        $if b[2]:
+            <input type='$b[4]' name='$b[0]' value='$b[1]' onclick='return confirm("$b[3].capitalize()");'>
+        $else:
+            <input type='$b[4]' name='$b[0]' value='$b[1]'>    
+        &nbsp;
+    <br>
+    <br>
+    $ pro0 = content[0]
+    <table>
+    $for i in pro0:
+        $ i0 = i[0]
+        $ i1 = i[1]
+        $ i2 = i[2]
+        $ i3 = i[3]
+        $ i5 = i[5]
+        $ i7 = i[7]
+        <tr>
+            <td width='30%'>
+                $if i7 == 0:
+                    $_[i1]
+                $else:
+                    $pk_sym $i1
+            </td>
+            <td>
+                $if i5:
+                    $:i5.render()
+                $else:
+                    <input type='text' name='$i0' value='$i3'>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <i>$pk_sym $_['x_user_defined_profile']</i>
+    <br>
+    </form>
+$elif data['command'] == 'schema':
+    <p>
+    <i>$:data['hint'].capitalize()</i>
+    </p>    
+    $if data['message']:
+        <div>
+            $for m in data['message']:
+                $': '.join(m)
+                <br>
+        </div>
+    <form action="$data['action_url']" method="$data['action_method']" enctype="$data['action_enctype']">
+    $for b in data['action_button']:
+        $if b[2]:
+            <input type='$b[4]' name='$b[0]' value='$b[1]' onclick='return confirm("$b[3].capitalize()");'>
+        $else:
+            <input type='$b[4]' name='$b[0]' value='$b[1]'>    
+        &nbsp;
+    <br>
+    <br>
+    <table>
+        <tr>
+            <td colspan='2'>
+                <br>
+                <br>
+                $content
+                <br>
+                <br>
+            </td>
+        </tr>
+        <tr>
+            <td>
+            $_['x_create_table_schema']
+            </td>
+            <td>
+            <input type='hidden' name='table' value='$data["table"]'>
+            <input type='text' name='target' value='$data["target"]'>
+            </td>            
+        </tr>
+    </table>
+    </form>
 $else:
     $:content
 </body>
 </html>
 '''
-test_t_base = os.path.join(CWDIR, DEFAULT_T_BASE)
+test_t_base = os.path.join(SCURDIR, DEFAULT_T_BASE)
 test_t_base = os.path.abspath(test_t_base)
 if os.access(test_t_base, os.R_OK):
-    T_BASE = open(test_t_base).read()
+    T_BASE = DEFAULT_T_BASE_HEADER + os.linesep + open(test_t_base).read()
 
 #
 GLBL = {
@@ -3559,8 +7391,16 @@ GLBL = {
     'isblob'    : isblob,
     'pk_sym'    : PK_SYM,
     'user'      : user,
+    'shortcuts' : r_shortcuts,
+    'print_data_key': PRINT_DATA_KEY,
+    'print_data_value': PRINT_DATA_VALUE,
+    'pr_get'    : pr_get,
+    'r_messages_all': r_messages_all,
+    'r_application_title': r_application_title,
+    'tr_newline': tr_newline_html,
+    'style_align_default': style_align_default,
     }
-T = web.template.Template(T_BASE, globals=GLBL)
+T = web.template.Template(T_BASE, globals=GLBL, filename=DEFAULT_T_BASE)
 
 
 #----------------------------------------------------------------------#
@@ -3587,7 +7427,7 @@ class index:
         stop()
         data = {'title': '', 'command': 'home', 'form': xform, 'report': xreport}
         content = (
-                    '%s <a href="%s">%s</a>' %(_['x_welcome2'], WSITE, NAME),
+                    '%s %s' %(_['x_welcome2'], NAME),
                     sysinfo(),
                 )
         return T(data, content)
@@ -3619,10 +7459,15 @@ class table_action:
             ('insert', '/table/row/' + table + '?mode=%s' %(MODE_INSERT)),
             ('column', '/table/column?table=' + table),
             ('rename', '/table/rename?table=' + table),
+            ('table_empty', '/table/empty?table=' + table),
             ('table_drop', '/table/drop?table=' + table),
-            ('export_csv', '/table/csv?table=' + table),
+            ('export_csv', '/table/export/csv?table=' + table),
+            ('import_csv', '/table/import/csv?table=' + table),
+            ('schema', '/table/schema?table=' + table),
+            ('copy', '/table/copy?table=' + table),
             ('table_create', '/table/create'),
             ('query', '/query'),
+            ('vacuum', '/vacuum'),
         )
         #
         prepsess()
@@ -3640,9 +7485,16 @@ class table_action:
         #
         table = input.table.strip()
         #
+        default_redir = '/table/browse/%s?limit=%s' %(table, DEFAULT_LIMIT)
+        real_redir = default_redir
+        http_referer = web.ctx.env.get('HTTP_REFERER', '')
+        http_home = web.ctx.home
+        if http_referer and http_home and http_referer.startswith(http_home):
+            real_redir = http_referer        
+        #
         select = input.select
         if not len(select):
-            raise web.seeother('/table/browse/%s' %(table))
+            raise web.seeother(real_redir)
         #
         try:
             select = [int(x) for x in select]
@@ -3652,11 +7504,15 @@ class table_action:
         if input.has_key('delete'):
             for i in select:
                 db.delete(table, where='%s=%s' %(ROWID, i))
-            raise web.seeother('/table/browse/%s' %(table))
+            raise web.seeother(real_redir)
         #
         elif input.has_key('edit'):
             sess.table[table][SKT_ROWID] = select
             raise web.seeother('/table/row/%s' %(table))
+        #
+        elif input.has_key('clear'):
+            sess.table[table][SKT_ROWID] = []
+            raise web.seeother(real_redir)
         #
         dflt()
         
@@ -3836,12 +7692,18 @@ class table_browse:
         #
         prepsess()
         #
-        input = web.input(limit=0, order='', sort='')
+        input = web.input(limit=0, order='', sort='', page=1, pages=0)
         #
         try:
-            limit = int(input.limit)
+            limit = abs(int(input.limit))
+            page = abs(int(input.page))
+            if page == 0:
+                page = 1
+            offset = (page-1) * limit
         except:
             limit = 0
+            page = 1
+            offset = 0
         #
         order = input.order
         qorder = None
@@ -3850,6 +7712,8 @@ class table_browse:
         column_sort = ''
         if not limit:
             limit = None
+        if not offset:
+            offset = None
         if not order:
             order = None
         else:
@@ -3861,15 +7725,39 @@ class table_browse:
                 if not limit:
                     column_query = 'order=%s&sort=%s' %(order, ssort(sort))
                 else:
-                    column_query = 'order=%s&sort=%s&limit=%s' %(order, ssort(sort), limit)
+                    column_query = 'order=%s&sort=%s&limit=%s&page=%s' %(order, ssort(sort), limit, page)
                 #
                 column_sort = vsort(sort) #current, not next
                 qorder = '%s %s' %(order, sort)
         #
         glimit = ''
         if limit: glimit = str(limit)
+        gpage = ''
+        if page: gpage = str(page)
+        iorder = ''
+        if order: iorder = order
+        if page > 1:
+            page_previous = page - 1
+        else:
+            page_previous = 1
+        page_next = page + 1
         #
-        r = db.select(table, what='%s as %s, *' %(ROWID, rowid), order=qorder, limit=limit)
+        ipages = '0'
+        apages = []
+        if input.pages == '1':
+            ipages = '1'
+        if ipages == '1' and limit:
+            try:
+                r = db.select(table, what='count(*) as count')
+                ncount = r[0].count
+                npages = (ncount / limit) + 1
+                if (npages-1) * limit != ncount:
+                    npages = npages + 1
+                apages = range(1, npages)
+            except:
+                ipages = '0'
+        #
+        r = db.select(table, what='%s as %s, *' %(ROWID, rowid), order=qorder, limit=limit, offset=offset).list()
         #
         data = {
             'title': table, 
@@ -3885,6 +7773,7 @@ class table_browse:
             'ksort': 'sort',
             'korder': 'order',
             'klimit': 'limit',
+            'kpage': 'page',
             'limit': glimit, 
             'select': NAME_SELECT,
             'action_url': '/table/action',
@@ -3892,6 +7781,7 @@ class table_browse:
             'action_button': (
                                 ('delete', _['cmd_delete_selected'], True, _['cf_delete_selected'], 'submit'), 
                                 ('edit', _['cmd_edit_selected'], False, '', 'submit'),
+                                ('clear', _['cmd_clear_selected'], False, '', 'submit'),
                             ),
             'hidden_key': 'table',
             'rowid' : rowid,
@@ -3901,6 +7791,16 @@ class table_browse:
             'blob_column': BLOB_COLUMN,
             'blob_command': _['cmd_download'],
             'selected': sess.table[table][SKT_ROWID],
+            'rows': len(r),
+            'page': gpage,
+            'page_previous': page_previous,
+            'page_next': page_next,
+            'input_order': iorder,
+            'input_sort': sort,
+            'browse_limit': [str(x) for x in BROWSE_LIMIT_ALL],
+            'input_pages': ipages,
+            'pages': [str(x) for x in apages],
+            'default_limit': DEFAULT_LIMIT,
             }
         #
         stop()
@@ -4022,8 +7922,8 @@ class table_rename:
         
     def POST(self):
         input = web.input(table='', name='')
-        table = input.table.strip()
-        name = input.name.strip()
+        table = input.table.strip().lower()
+        name = input.name.strip().lower()
         if not table in tables() or not name: 
             dflt()
         #
@@ -4096,7 +7996,7 @@ class table_drop:
         dflt()        
 
 
-class table_csv:
+class table_export_csv:
     def GET(self):
         table = web.input(table='').table
         if not table in tables(): 
@@ -4163,6 +8063,7 @@ class query:
             'action_method': 'post',
             'action_button': (
                                 ('query', _['cmd_query'], False, '', 'submit'),
+                                ('query_export', _['cmd_query_export_csv'], False, '', 'submit'),
                             ),
             'hint': _['h_query'],
             'message': smsgq('query'),
@@ -4179,23 +8080,56 @@ class query:
             raise web.seeother('/query')
         #
         start()
+        qerr = 0
         try:
             msg = db.query(q)
             err = _['th_ok']
             multi = 1
-            if type(msg) == type(1):
+            if isinstance(msg, (int, long, float)):
                 multi = 0 
         except Exception, e:
             msg = e.message
             err = _['th_error']
             multi = 0
+            qerr = 1
         #
         stop()
         t = rt()
         #
         prepsess()
-        sess.query = [q, err, multi, msg, t]
-        raise web.seeother('/query')
+        #
+        if web.input().has_key('query_export') and not qerr and multi:
+            fout = cStringIO.StringIO()
+            writer = csv.writer(fout)
+            #
+            keys = []
+            counter = 0
+            for i in msg:
+                if counter == 0:
+                    keys = i.keys()
+                    writer.writerow(keys)
+                #
+                line = []
+                for k in keys:
+                    v = i.get(k)
+                    if isblob(v):
+                        v = base64.b64encode(v)
+                    line.append(v)
+                #
+                writer.writerow(line)
+                counter += 1
+            #
+            content = fout.getvalue()
+            #
+            disposition = 'attachment; filename=' + '%s' %(DEFAULT_QUERY_EXPORT)
+            web.header('Content-Type', CSV_CTYPE)
+            web.header('Content-Disposition', disposition)
+            return content            
+        else:
+            sess.query = [q, err, multi, msg, t]
+            raise web.seeother('/query')
+        #
+        dflt()
 
 
 class table_create:
@@ -4263,7 +8197,7 @@ class table_create:
     def POST(self):
         input = web.input(count=0, table='', step='', name=[], type=[], pk=[], default=[])
         count = input.count
-        table = input.table.strip()
+        table = input.table.strip().lower()
         step = input.step.strip()
         name = [x.strip() for x in input.name]
         type = [x.strip() for x in input.type]
@@ -4347,34 +8281,66 @@ class sqliteboy_init:
 class sqliteboy_readme:
     def GET(self):
         start()
+        #
+        inp = web.input(download='')
+        download = inp.download.strip()
+        error = 0
+        #
         data = {
                 'title': _['tt_readme'],
                 'command': 'readme',
+                'download': '%s?download=1' %(URL_README[0]),
+                'size': fsize(URL_README[2]),
             }
         #
         try:
             content = open(os.path.join(CURDIR, URL_README[2])).read()
         except:
             content = _['e_open_file']
+            error = 1
         #
         stop()
+        #
+        if download == '1' and not error:
+            disposition = 'attachment; filename=%s' %(URL_README[2])
+            web.header('Content-Type', PLAIN_CTYPE)
+            web.header('Content-Disposition', disposition)
+            return content
+        #
         return T(data, content)
 
 
 class sqliteboy_source:
     def GET(self):
         start()
+        #
+        inp = web.input(download='')
+        download = inp.download.strip()
+        #        
         data = {
                 'title': _['tt_source'],
                 'command': 'source',
+                'download': '%s?download=1' %(URL_SOURCE[0]),
+                'size': fsize(URL_SOURCE[2]),
             }
         #
+        content2 = ''
         try:
             content = web.htmlquote(open(os.path.join(CURDIR, URL_SOURCE[2])).read())
+            #
+            if download == '1':
+                content2 = open(os.path.join(CURDIR, URL_SOURCE[2])).read()
         except:
             content = _['e_open_file'] 
         #
         stop()
+        #
+        if download == '1' and content2.strip():
+            disposition = 'attachment; filename=%s' %(URL_SOURCE[2])
+            web.header('Content-Type', PLAIN_CTYPE)
+            web.header('Content-Disposition', disposition)
+            return content2
+        #
         return T(data, content)
 
 
@@ -4424,6 +8390,7 @@ class login:
 
 class logout:
     def GET(self):
+        sess.var = {}
         sess.user = ''
         sess.admin = 0
         dflt()
@@ -4691,6 +8658,7 @@ class admin_system:
                     _[s[1]],
                     s[2],
                     s_check(s[2], s[3]).get('d'),
+                    s[6],
                 ]
             content.append(c)
         #
@@ -4714,11 +8682,14 @@ class admin_system:
                     kdf = kd[1]
                     ku = inp.get(k, kdv)
                     try:
+                        if isinstance(kdf, str):
+                            kdf = globals().get(kdf)
                         test = kdf(ku)
+                        ku = test
                     except:
                         ku = kdv
                     p = '%s%s%s' %(k, FORM_SPLIT, ku)
-                    s_save(p)
+                    s_save(p, maxsplit=SYSTEM_CONFIG_MAXSPLIT)
             sess[SK_SYSTEM] = _['o_system']
         except:
             sess[SK_SYSTEM] = _['e_system']
@@ -4766,6 +8737,7 @@ class form_action:
         form = input.form.strip()
         redir = (
             ('run', '/form/run/' + form),
+            ('shortcut', '/form/shortcut/' + form),
             ('edit', '/form/edit?form=' + form),
             ('create', '/form/edit?mode=' + MODE_INSERT),
         )
@@ -4791,21 +8763,26 @@ class form_run:
         #
         input = ()
         sub = ()
-        action_button = (
-                            ('save', _['cmd_save'], False, '', 'submit'),
-                        )
+        action_button = ()
         ftitle = ''
         finfo = ''
+        fconfirm = ''
+        yconfirm = False
         if not reqform(form):
             input = ()
             sub = ()
-            action_button = ()
             sess[SKF_RUN] = [
                                 [_['e_form_run_syntax_or_required']],
                             ]
         else:
             try:
                 pform = parseform(form)
+                fconfirm = pform[7]
+                if fconfirm:
+                    yconfirm = True
+                action_button = (
+                                    ('save', _['cmd_go'], yconfirm, fconfirm, 'submit'),
+                                )
             except:
                 pform = [ftitle, finfo, input, sub]
             #
@@ -4834,7 +8811,7 @@ class form_run:
                 'text_type': TEXT_TYPE,
                 'sub': sub,
                 }
-        content = ''
+        content = web.input()
         stop()
         return T(data, content)
         
@@ -4855,12 +8832,16 @@ class form_run:
         fsub = None
         message2 = None
         fsql2 = None
+        fsql0 = None
+        finsert = FORM_INSERT_DEFAULT
         try:
             pform = parseform(form)
             finput = pform[2]
             fsub = pform[3]
             message2 = pform[4]
             fsql2 = pform[5]
+            fsql0 = pform[8]
+            finsert = pform[6]
         except:
             pform = None
             fsub = None
@@ -5013,8 +8994,10 @@ class form_run:
         except Exception, e:
             errors.append( [ _['e_form_run_subform'], str(e)] )
         #        
+        ucontent = ''
         if errors:
             sess[SKF_RUN] = errors
+            ucontent = uquery(ocols)
         else:
             form_trans = db.transaction()
             #
@@ -5026,30 +9009,56 @@ class form_run:
                         ','.join(okeys),
                         ','.join(okeys2),
                     )
-                form_res = db.query(q, vars=ocols)
                 #
-                form_last = db.query('select last_insert_rowid() as x')[0]['x']
+                #insert?
+                form_res = finsert
+                form_last = finsert
                 #
-                #subform save
-                if (fsub_table in tables()) and (fsub_all2) and (fsub_ref in columns(fsub_table, True)):
-                    for f in fsub_all2:
-                        f[fsub_ref] = form_last
-                        fkeys = f.keys()
-                        fkeys2 = ['$'+x for x in fkeys]
-                        fq = 'insert into %s(%s) values(%s)' %(
-                                fsub_table,
-                                ','.join(fkeys),
-                                ','.join(fkeys2)
-                            )
-                        db.query(fq, f)
+                #custom SQL (sql0)
+                fsqlx(db, fsql0, ocols)                
+                #
+                if finsert > 0:
+                    form_res = db.query(q, vars=ocols)
+                    #
+                    form_last = db.query('select last_insert_rowid() as x')[0]['x']
+                    #
+                    #subform save
+                    if (fsub_table in tables()) and (fsub_all2) and (fsub_ref in columns(fsub_table, True)):
+                        for f in fsub_all2:
+                            f[fsub_ref] = form_last
+                            fkeys = f.keys()
+                            fkeys2 = ['$'+x for x in fkeys]
+                            fq = 'insert into %s(%s) values(%s)' %(
+                                    fsub_table,
+                                    ','.join(fkeys),
+                                    ','.join(fkeys2)
+                                )
+                            db.query(fq, f)
                 #
                 #custom SQL (sql2)
                 ocols['last_insert_rowid'] = form_last
-                if fsql2 and type(fsql2) == type([]):
-                    for fsql in fsql2:
-                        if fsql and hasattr(fsql, 'strip'):
-                            if fsql.strip():
-                                db.query(fsql, vars=ocols)
+                fsqlx(db, fsql2, ocols)
+                #
+                #python handler
+                try:
+                    py_func = py_handler(py_f(form))
+                    f_python_handler = py_func(
+                                            user(), 
+                                            db, 
+                                            pform, 
+                                            [
+                                                table,
+                                                ocols,
+                                                fsub_table,
+                                                fsub_all2,
+                                                fsub_ref,
+                                            ],
+                                            PY_HANDLER_DATA
+                                        )
+                    if not isinstance(f_python_handler, int):
+                        raise Exception
+                except:
+                    f_python_handler = -1
                 #
                 #custom message
                 message3 = _['o_form_run']
@@ -5062,8 +9071,11 @@ class form_run:
                     elif form_res > 0:
                         message2b = message2[2]
                     message2b = str(message2b)
-                    message3 = message2b.replace(FORM_MESSAGE_VAR_RESULT, 
-                        str(form_res))
+                    #
+                    message2b = string.Template(message2b)
+                    ocols[FORM_MESSAGE_VAR_RESULT] = str(form_res)
+                    ocols[FORM_MESSAGE_VAR_PYTHON_HANDLER] = str(f_python_handler)
+                    message3 = message2b.safe_substitute(ocols)
                 #
                 sess[SKF_RUN] = [ [message3] ]
             except Exception, e:
@@ -5073,7 +9085,7 @@ class form_run:
             else:
                 form_trans.commit()
         #
-        raise web.seeother('/form/run/%s' %(form))
+        raise web.seeother('/form/run/%s?%s' %(form, ucontent))
         
 
 class form_edit:
@@ -5204,6 +9216,16 @@ class form_edit:
                 xform = form
                 if form != name:
                     xform = name
+                    #
+                    db.update(FORM_TBL, where='a=$a and b=$b and d=$d and e=$e',
+                        vars={
+                                'a': 'my',
+                                'b': 'shortcuts',
+                                'd': form,
+                                'e': SHORTCUT_TYPE_FORM,
+                            },
+                        d=name
+                    )
                 code = json.loads(code)
                 code = json.dumps(code)
                 db.update(FORM_TBL, where='a=$a and b=$b and d=$d',
@@ -5228,6 +9250,7 @@ class report_action:
         report = input.report.strip()
         redir = (
             ('run', '/report/run/' + report),
+            ('shortcut', '/report/shortcut/' + report),
             ('edit', '/report/edit?report=' + report),
             ('create', '/report/edit?mode=' + MODE_INSERT),
         )
@@ -5366,6 +9389,16 @@ class report_edit:
                 xreport = report
                 if report != name:
                     xreport = name
+                    #
+                    db.update(FORM_TBL, where='a=$a and b=$b and d=$d and e=$e',
+                        vars={
+                                'a': 'my',
+                                'b': 'shortcuts',
+                                'd': report,
+                                'e': SHORTCUT_TYPE_REPORT,
+                            },
+                        d=name
+                    )                    
                 code = json.loads(code)
                 code = json.dumps(code)
                 db.update(FORM_TBL, where='a=$a and b=$b and d=$d',
@@ -5395,20 +9428,39 @@ class report_run:
             dflt()
         #
         input = ()
-        action_button = (
-                            ('report', _['cmd_report'], False, '', 'submit'),
-                        )
+        action_button = ()
+        #
         ftitle = ''
         finfo = ''
+        fconfirm = ''
+        yconfirm = False
         if not reqreport(report):
             input = ()
-            action_button = ()
             sess[SKR_RUN] = [
                                 [_['e_report_run_syntax_or_required']],
                             ]
         else:
             try:
                 preport = parsereport(report)
+                fconfirm = preport[10]
+                if fconfirm:
+                    yconfirm = True
+                #
+                action_button = [
+                                    ('report', _['cmd_go'], yconfirm, fconfirm, 'submit'),
+                                    (PRINT_DATA_KEY, _['cmd_go_print'], yconfirm, fconfirm, 'submit'),
+                                    (REPORT_FORMAT_CSV, _['cmd_csv'], yconfirm, fconfirm, 'submit'),
+                                ]
+                if reportlab:
+                    action_button.append(
+                                            (
+                                                REPORT_FORMAT_PDF, 
+                                                _['cmd_pdf'], 
+                                                yconfirm, 
+                                                fconfirm, 
+                                                'submit'
+                                            ),
+                                        )                        
             except:
                 preport = [ftitle, finfo, input]
             #
@@ -5435,13 +9487,19 @@ class report_run:
                 'blob_type': BLOB_TYPE,
                 'text_type': TEXT_TYPE,
                 }
-        content = ''
+        content = web.input()
         stop()
         return T(data, content)
         
     def POST(self, unused):
         input = web.input(hreport='')
         report = input.hreport.strip()
+        #
+        rformat = REPORT_FORMAT_DEFAULT
+        if input.has_key(REPORT_FORMAT_CSV):
+            rformat = REPORT_FORMAT_CSV
+        elif input.has_key(REPORT_FORMAT_PDF):
+            rformat = REPORT_FORMAT_PDF
         #
         if not report:
             dflt()
@@ -5453,21 +9511,33 @@ class report_run:
             dflt()
         #
         freport = report
+        reportinfo = ''
         finput = None
         rquery = None
         rheader = []
         message2 = []
+        pheaders = []
+        pfooters = []
+        pheaders2 = []
+        pfooters2 = []
+        palign = {}        
         try:
             preport = parsereport(report)
             freport = preport[0]
+            reportinfo = preport[1]
             finput = preport[2]
             rquery = preport[3]
             rheader = preport[4]
             message2 = preport[5]
+            pheaders = preport[6]
+            pfooters = preport[7]
+            palign = preport[11]
         except:
             preport = None
         #
-        if not preport or not finput:
+        #if not preport or not finput: 
+        #as of 9-July-2013/v1.06, data might be empty
+        if not preport:
             dflt()
         #
         start()
@@ -5556,15 +9626,33 @@ class report_run:
             rsearch.append( [label, cvv] )
             #
         #
+        ucontent = ''
         if errors:
             sess[SKR_RUN] = errors
-            raise web.seeother('/report/run/%s' %(report))
+            ucontent = uquery(ocols)
+            raise web.seeother('/report/run/%s?%s' %(report, ucontent))
         else:
             try:
-                rreport = db.query(rquery, vars=ocols)
+                #python handler or sql query
+                py_func = py_handler(py_r(report))
+                if py_func:
+                    rreport = py_func(
+                                        user(), 
+                                        db, 
+                                        preport, 
+                                        [
+                                            ocols,
+                                        ],
+                                        PY_HANDLER_DATA
+                                    )
+                else:
+                    rreport = db.query(rquery, vars=ocols)
             except Exception, e:
                 sess[SKR_RUN] = [ [_['e_report_select_general'], str(e)] ]
                 raise web.seeother('/report/run/%s' %(report))
+        #
+        r_row_count = -1
+        r_report_result = -1
         #
         data = {
                 'title': '%s - %s' %(_['tt_report_run_result'], report), 
@@ -5573,6 +9661,8 @@ class report_run:
                 'header': rheader,
                 'search': rsearch,
                 'report2': freport,
+                'headers': pheaders2,
+                'align': palign,
                 }
         content = rreport
         #
@@ -5582,6 +9672,7 @@ class report_run:
         message3 = ''
         message2b = ''
         if xtable == False:
+            ocols[REPORT_MESSAGE_VAR_RESULT] = content
             try:
                 if content < 0:
                     message2b = message2[0]
@@ -5590,13 +9681,226 @@ class report_run:
                 elif content > 0:
                     message2b = message2[2]
                 #
-                message3 = message2b.replace(REPORT_MESSAGE_VAR_RESULT, 
-                    str(content))
+                message2b = string.Template(message2b)
+                message3 = message2b.safe_substitute(ocols)                
             except:
                 pass
+        else:
+            try:
+                content = content.list()
+            except:
+                pass
+            try:
+                r_row_count = len(content)
+            except:
+                pass
+            ocols[REPORT_MESSAGE_VAR_RESULT] = r_report_result
+        #
         data['result_message'] = message3
         #
+        ocols[REPORT_RESULT_ROW_COUNT] = r_row_count
+        ocols[REPORT_RESULT_MESSAGE] = message3
+        #
+        pboth = [
+                    [
+                        pheaders, 
+                        pheaders2,
+                        REPORT_HEADERS_CELL_LEN,
+                        REPORT_HEADERS_CELL_TYPES,
+                    ],
+                    [
+                        pfooters, 
+                        pfooters2,
+                        REPORT_FOOTERS_CELL_LEN,
+                        REPORT_FOOTERS_CELL_TYPES,
+                    ],
+                ]
+        #
+        for phf in pboth:
+            phfx = phf[0]
+            phfy = phf[1]
+            phfz = phf[2]
+            phft = phf[3]
+            #
+            if not phfx or not len(phfx) == 2:
+                continue
+            #
+            phfx0 = phfx[0]
+            phfx1 = phfx[1]
+            #
+            if (not phfx0) \
+                or (not phfx1) \
+                or (not isinstance(phfx0, list)) \
+                or (not isinstance(phfx1, int)):
+                    phfx0 = []
+                    phfx1 = 0
+            #
+            for p in phfx0:
+                phfl = []
+                #
+                for pc in p:
+                    if not len(pc) == phfz:
+                        continue 
+                    #
+                    if not isinstance(pc[0], phft[0]) \
+                        or not isinstance(pc[2], phft[2]) \
+                        or not isinstance(pc[1], phft[1]):
+                            continue
+                    #
+                    if hasattr(pc[0], 'lower'):
+                        pc[0] = pc[0].lower()
+                    #
+                    phfc = {}
+                    #
+                    pc2 = pc[2]
+                    pc2['type'] = pc[0]
+                    #
+                    if pc[0] == REPORT_CELL_TYPE_TEXT:
+                        if rformat in REPORT_FORMAT_ALL:
+                            phfc = {
+                                        'content': tr_report_text(
+                                                        pc[1],
+                                                        pc[2]
+                                                    ),
+                                        'data': pc2,
+                                    }
+                    elif pc[0] == REPORT_CELL_TYPE_SQL:
+                        if rformat in REPORT_FORMAT_ALL:
+                            phfq = pc[1]
+                            phfqr = ''
+                            #                            
+                            try:
+                                phfqr0 = db.query(phfq, vars=ocols).list()
+                                phfqr1 = phfqr0[0]
+                                phfqr = phfqr1.get(
+                                    REPORT_CELL_TYPE_SQL_RESULT,
+                                    ''
+                                    )
+                                if isblob(phfqr):
+                                    phfqr = ''
+                            except:
+                                pass
+                            #
+                            phfc = {
+                                        'content': phfqr,
+                                        'data': pc2,
+                                    }
+                    elif pc[0] == REPORT_CELL_TYPE_FILES_IMAGE:
+                        if rformat in REPORT_FORMAT_ALL:
+                            phfc = {
+                                        'content': str(pc[1]),
+                                        'data': pc2,
+                                    }                            
+                    #
+                    phfl.append(phfc)                        
+                #
+                phfl2 = [x for x in phfl if x]
+                #
+                if not phfl2:
+                    continue
+                #
+                #fit to length
+                if len(phfl) < phfx1:
+                    phfx1d = phfx1 - len(phfl)
+                    for d in range(phfx1d):
+                        phfl.append({})
+                #
+                if phfl:
+                    phfy.append(phfl)
+        #
+        phtempd = {
+                        'type': REPORT_CELL_TYPE_TEXT,
+                }
+        #
+        if not pheaders2:
+            pheaders2.append(
+                [
+                    {
+                        'content': freport,
+                        'data': phtempd,
+                    },
+                    {
+                        'content': reportinfo,
+                        'data': phtempd,
+                    },
+                ]
+            )
+            #
+            for x in rsearch:
+                phtemp = []
+                for y in x:
+                    phtemp.append(
+                        {
+                            'content': y,
+                            'data': phtempd,
+                        }
+                    )
+                pheaders2.append(phtemp)
+        #
+        if not pfooters2:
+            if r_row_count > -1:
+                pfooters2.append(
+                    [
+                        {
+                            'content': r_row_count,
+                            'data': phtempd,
+                        },
+                        {
+                            'content': _['x_row'],
+                            'data': phtempd,
+                        },
+                    ]
+                )
+            if message3:
+                pfooters2.append(
+                    [
+                        {
+                            'content': message3,
+                            'data': phtempd,
+                        },
+                        {
+                            'content': '',
+                            'data': phtempd,
+                        },
+                    ]
+                )
+        #
+        data['headers'] = pheaders2
+        data['footers'] = pfooters2
+        #
+        data = u_print(input, data)
+        #
         stop()
+        #
+        if rformat == REPORT_FORMAT_CSV:
+            try:
+                rpt_csv_content = rpt_csv(data, content)
+            except Exception, e:
+                sess[SKR_RUN] = [
+                                    [_['th_error'], str(e)]
+                                ]
+                ucontent = uquery(ocols)
+                raise web.seeother('/report/run/%s?%s' %(report, ucontent))
+            else:
+                disposition = 'attachment; filename=' + '%s%s' %(report, CSV_SUFFIX)
+                web.header('Content-Type', CSV_CTYPE)
+                web.header('Content-Disposition', disposition)
+                return rpt_csv_content
+        #
+        if rformat == REPORT_FORMAT_PDF:
+            try:
+                rpt_pdf_content = rpt_pdf(data, content, preport)
+            except Exception, e:
+                sess[SKR_RUN] = [
+                                    [_['th_error'], str(e)]
+                                ]
+                ucontent = uquery(ocols)
+                raise web.seeother('/report/run/%s?%s' %(report, ucontent))
+            else:
+                disposition = 'attachment; filename=' + '%s%s' %(report, PDF_SUFFIX)
+                web.header('Content-Type', PDF_CTYPE)
+                web.header('Content-Disposition', disposition)
+                return rpt_pdf_content
         #
         return T(data, content)
 
@@ -5884,15 +10188,22 @@ class files:
                 g['type_options'] = n.type_options
                 g['disposition'] = n.disposition
                 g['disposition_options'] = n.disposition_options
+                g['raw'] = 1
                 #
                 gj = json.dumps(g)
             except:
                 pass
             #
             try:
+                n_value = n.value
+                if isblob(n_value):
+                    n_value2 = db.db_module.Binary(n_value)
+                else:
+                    n_value2 = n_value
+                #
                 db.insert(FORM_TBL, a='my', b='files', c=user(),  
                     d=n.filename, 
-                    e=base64.b64encode(n.value), 
+                    e=n_value2, 
                     f='0',
                     g=gj,
                 )
@@ -5923,17 +10234,7 @@ class fs:
         fn = ''
         fc = ''
         try:
-            r = db.select(FORM_TBL, 
-                            what='d, e, g', 
-                            where='rowid=$sid',
-                            vars={
-                                    'sid': long(sid),
-                                }
-                        )
-            r = r[0]
-            ft = json.loads(r.g).get('type')
-            fn = r.d
-            fc = base64.b64decode(r.e)
+            fn, ft, fc = r_fs_content(sid)
         except:
             dflt()
         #
@@ -6077,6 +10378,8 @@ class calculator:
         if not q:
             raise web.seeother('/calculator')
         #
+        error = 1
+        #
         start()
         try:
             if len(q) > CALCULATOR_MAX_INPUT:
@@ -6094,15 +10397,1065 @@ class calculator:
                     )
             msg = msg[0].get(q, '')
             err = _['th_ok']
+            error = 0
         except Exception, e:
             msg = e.message
             err = _['th_error']
+            error = 1
         #
         stop()
         t = rt()
         #
-        sess[SK_CALCULATOR] = [q0, err, msg, t]
+        sess[SK_CALCULATOR] = [q0, err, msg, t, error]
         raise web.seeother('/calculator')
+
+
+class admin_scripts:
+    def GET(self):
+        start()
+        #
+        data = {
+                'title': _['tt_scripts'],
+                'command': 'scripts',
+                'action_url': '/admin/scripts',
+                'action_method': 'post',
+                'action_enctype': 'multipart/form-data',
+                'action_button': (
+                                    ('save', _['cmd_save'], False, '', 'submit'),
+                                ),
+                'columns': (
+                            _['x_name'], 
+                            _['x_info'], 
+                            _['x_author'], 
+                            _['x_license'], 
+                            _['x_run_time'],
+                        ),                                
+                'message': smsgq(SK_SCRIPTS),
+                'hint': _['h_scripts'],
+            }
+        #
+        content = r_scripts()
+        #
+        stop()
+        return T(data, content)
+
+    def POST(self):
+        inp = web.input(d_new={})
+        d_new = inp.d_new
+        #
+        if not hasattr(d_new, 'filename'):
+            raise web.seeother('/admin/scripts')
+        #
+        fname = d_new.filename
+        if not fname:
+            raise web.seeother('/admin/scripts')
+        #
+        code = ''
+        dcode = {}
+        sname = ''
+        g = {}
+        msg = []
+        #
+        try:
+            code = d_new.value
+            size = len(code)
+            smax = r_system('scripts.max_size.')
+            #
+            if size > smax:
+                raise Exception, _['e_scripts_max_size']
+            #
+            dcode = json.loads(code)
+            #
+            for k in SCRIPT_REQ:
+                if not dcode.has_key(k):
+                    raise Exception, _['e_scripts_syntax_or_required']
+            #
+            g['size'] = size
+            g['type'] = d_new.type
+            g['type_options'] = d_new.type_options
+            g['disposition'] = d_new.disposition
+            g['disposition_options'] = d_new.disposition_options            
+        except Exception, e:
+            msg = [
+                    [ fname, str(e) ],
+                ]
+            sess[SK_SCRIPTS] = msg
+            raise web.seeother('/admin/scripts')
+        #
+        sname = dcode.get(SCRIPT_KEY_NAME, '')
+        if isstr(sname):
+            sname = sname.strip()
+        if not isstr(sname) or not sname:
+            msg = [
+                    [ _['e_scripts_name'] ],
+                ]
+            sess[SK_SCRIPTS] = msg
+            raise web.seeother('/admin/scripts')            
+        #
+        try:
+            g['user'] = user()
+            #            
+            gj = json.dumps(g)
+            #
+            r = db.insert(FORM_TBL, 
+                    a='install',
+                    b='scripts',
+                    c='',
+                    d='',
+                    e=code,
+                    f='',
+                    g=gj
+                )
+            #
+            msg = [
+                    [ _['o_scripts'] ],
+                ]
+            sess[SK_SCRIPTS] = msg            
+        except:
+            pass
+        #
+        raise web.seeother('/admin/scripts')
+
+
+class admin_script:
+    def GET(self, script):
+        start()
+        #
+        try:
+            itest = int(script)
+        except:
+            dflt()
+        #
+        scode = g_script(script)
+        if not scode:
+            dflt()
+        #
+        action_button = (
+                            ('run', _['cmd_run'], False, '', 'submit'),
+                        )
+        #
+        run = str(scode.get('f', ''))
+        content = xparsescript(scode)
+        #
+        if not xokscript(content):
+            action_button = ()
+            if not sess.get(SK_SCRIPT):
+                sess[SK_SCRIPT] = [
+                                    [
+                                        _['x_script_not_runnable'],
+                                    ],
+                                ]
+        #
+        table_detail = {}
+        try:
+            ctables = content.get(SCRIPT_KEY_TABLES)
+            for c in ctables:
+                if c[1] == SCRIPT_TABLE_COLUMN_CONFLICT:
+                    table_detail[c[0]] = c[4]
+                elif c[1] == SCRIPT_TABLE_EXISTS:
+                    table_detail[c[0]] = c[3]
+                elif c[1] == SCRIPT_TABLE_OK:
+                    table_detail[c[0]] = c[3]
+        except:
+            pass
+        #
+        profile_info = []
+        try:
+            profile_info0 = content.get(SCRIPT_KEY_PROFILES)
+            profile_info = [x[0] for x in profile_info0 if validfname(x[0])]
+        except:
+            pass
+        #
+        ecode = str(scode.get('e', ''))
+        #
+        data = {
+                'title': _['tt_script'],
+                'command': 'script',
+                'action_url': '/admin/script/%s' %(script,),
+                'action_method': 'post',
+                'action_enctype': 'multipart/form-data',
+                'action_button': action_button,
+                'columns': (
+                            _['x_key'], 
+                            _['x_detail'], 
+                            _['x_system_check'], 
+                        ),                                
+                'info': (
+                            (_['x_name'], SCRIPT_KEY_NAME),
+                            (_['x_info'], SCRIPT_KEY_INFO),
+                            (_['x_author'], SCRIPT_KEY_AUTHOR),
+                            (_['x_license'], SCRIPT_KEY_LICENSE),
+                        ),
+                'table_info': {
+                                SCRIPT_TABLE_ERROR: _['th_error'],
+                                SCRIPT_TABLE_COLUMN_CONFLICT: _['e_script_column_conflict'],
+                                SCRIPT_TABLE_OK: _['th_ok'],
+                                SCRIPT_TABLE_EXISTS: _['x_table_exists'],
+                            },
+                'form_info': {
+                                SCRIPT_FORM_ERROR: _['th_error'],
+                                SCRIPT_FORM_OK: _['th_ok'],
+                                SCRIPT_FORM_EXISTS: _['e_form_edit_exists'],
+                            },
+                'report_info': {
+                                SCRIPT_REPORT_ERROR: _['th_error'],
+                                SCRIPT_REPORT_OK: _['th_ok'],
+                                SCRIPT_REPORT_EXISTS: _['e_report_edit_exists'],
+                            },                            
+                'profile_info': {
+                            },
+                'table_detail': table_detail,
+                'run': run,
+                'code': ecode,
+                'message': smsgq(SK_SCRIPT),
+                'hint': _['h_script'],
+            }
+        #
+        stop()
+        return T(data, content)
+
+    def POST(self, script):
+        inp = web.input()
+        #
+        itest = -1
+        try:
+            itest = int(script)
+        except:
+            dflt()
+        #
+        scode = g_script(script)
+        if not scode:
+            dflt()
+        #
+        url = '/admin/script/%s' %(script,)
+        #        
+        content = xparsescript(scode)
+        if not xokscript(content):
+            sess[SK_SCRIPT] = [
+                                [
+                                    _['th_error'],
+                                    _['x_script_not_runnable'],
+                                ],
+                            ]
+            raise web.seeother(url)
+        #
+        msg = []
+        script_trans = db.transaction() 
+        oldtables = tables()
+        oldtables = [x.lower() for x in oldtables]
+        newtables = []
+        newforms = []
+        newreports = []
+        try:
+            stables = content.get(SCRIPT_KEY_TABLES)
+            for tt in stables:
+                tname = tt[0]
+                tstat = tt[1]
+                tcols = tt[2]
+                ncols = tt[3]
+                xcols = tt[4]
+                #
+                if tstat == SCRIPT_TABLE_EXISTS:
+                    for n in ncols:
+                        q = 'alter table %s add column %s %s' %(
+                            tname,
+                            n[0],
+                            n[1],
+                        )
+                        r = db.query(q)
+                        if r:
+                            msg.append(
+                                        [
+                                            _['o_column'],
+                                            tname,
+                                            n[0],
+                                            n[1],
+                                        ]
+                            )
+                elif tstat == SCRIPT_TABLE_OK:
+                    newcols = []
+                    newpk = []
+                    #
+                    for n in tcols:
+                        if n[2] == 1: #primary key
+                            newcols.append(
+                                '%s %s' %(
+                                            n[0],
+                                            n[1],
+                                        )
+                            )
+                            newpk.append(n[0])
+                        elif n[2] == 0:
+                            newcols.append(
+                                '%s %s' %(
+                                            n[0],
+                                            n[1],
+                                        )
+                            )
+                        else:
+                            for v in SCRIPT_VALID_COLUMN_FLAG:
+                                if v[0] and (n[1] in v[0]) and (n[2] == v[1]):
+                                    newcols.append(
+                                        '%s %s %s' %(
+                                                        n[0],
+                                                        n[1],
+                                                        v[2],
+                                                    )
+                                    )
+                                    break
+                        #
+                    if newpk:
+                        q = 'create table %s(%s, primary key(%s))' %(
+                            tname,
+                            ','.join(newcols),
+                            ','.join(newpk),
+                        )
+                    else:
+                        q = 'create table %s(%s)' %(
+                            tname,
+                            ','.join(newcols),
+                        )                        
+                    #
+                    r = db.query(q)
+                    if r:
+                        msg.append(
+                                    [
+                                        _['o_table_create'],
+                                        tname,
+                                    ]
+                        )
+                        newtables.append(tname)
+            #
+            #
+            sforms = content.get(SCRIPT_KEY_FORMS)
+            for tt in sforms:
+                tname = tt[0]
+                tstat = tt[1]
+                tcont = tt[2]
+                jcont = tt[3]
+                #
+                if tstat == SCRIPT_FORM_OK:
+                    if tname.lower() in newforms:
+                        continue
+                    #
+                    r = db.insert(FORM_TBL,
+                            a='form',
+                            b='code',
+                            d=tname.lower(),
+                            e=jcont
+                        )
+                    if r:
+                        msg.append(
+                                    [
+                                        _['o_form_create'],
+                                        tname,
+                                    ]
+                        )                        
+                        newforms.append(tname.lower())
+            #
+            #
+            sreports = content.get(SCRIPT_KEY_REPORTS)
+            for tt in sreports:
+                tname = tt[0]
+                tstat = tt[1]
+                tcont = tt[2]
+                jcont = tt[3]
+                #
+                if tstat == SCRIPT_REPORT_OK:
+                    if tname.lower() in newreports:
+                        continue
+                    #
+                    r = db.insert(FORM_TBL,
+                            a='report',
+                            b='code',
+                            d=tname.lower(),
+                            e=jcont
+                        )
+                    if r:
+                        msg.append(
+                                    [
+                                        _['o_report_create'],
+                                        tname,
+                                    ]
+                        )
+                        newreports.append(tname.lower())
+            #
+            sprofiles = content.get(SCRIPT_KEY_PROFILES)
+            juprofiles = r_system('users.profile.')
+            try:
+                try:
+                    uprofiles = json.loads(juprofiles)
+                except:
+                    uprofiles = []
+                nprofiles = uprofiles + sprofiles
+                jnprofiles = json.dumps(nprofiles, indent=JSON_INDENT)
+                r = s_save('users.profile..%s' %(jnprofiles))
+                if r:
+                    for i in sprofiles:
+                        msg.append(
+                                    [
+                                        _['o_profile_set'],
+                                        i[0],
+                                    ]
+                        )
+                
+            except:
+                pass
+            #
+            db.update(FORM_TBL, where='rowid=$script', 
+                f=sqliteboy_time3(sqliteboy_time()),
+                vars = {
+                    'script': itest,
+                }
+            )
+        except Exception, e:
+            msg.append(
+                        [
+                            _['th_error'],
+                            str(e),
+                        ],
+            )
+            #
+            if newtables:
+                try:
+                    for t in newtables:
+                        if t.lower() in oldtables:
+                            continue
+                        #
+                        if db.select(t).list():
+                            continue
+                        #
+                        q = 'drop table %s' %(t)
+                        db.query(q)
+                        #
+                        msg.append(
+                                    [
+                                        _['o_drop'],
+                                        t,
+                                    ]
+                        )
+                except:
+                    pass
+            #
+            msg.append(
+                        [
+                            _['e_script']
+                        ],
+            )
+            script_trans.rollback()
+        else:
+            msg.append(
+                        [
+                            _['o_script']
+                        ],
+            )
+            script_trans.commit()
+        #
+        sess[SK_SCRIPT] = msg
+        #
+        raise web.seeother(url)
+
+
+class table_copy:
+    def GET(self):
+        start()
+        #
+        table = web.input(table='').table
+        if not table in tables(): 
+            dflt()
+        #
+        excludes = COPY_TARGET_EXCLUDE[:]
+        excludes.append(table)
+        target = tables(exclude=excludes)
+        #
+        action_button = (
+                            ('copy', _['cmd_copy'], False, '', 'submit'),
+                        )
+        if not target:
+            action_button = ()
+        #
+        data = {
+                'title': _['tt_copy'],
+                'command': 'copy',
+                'action_url': '/table/copy',
+                'action_method': 'post',
+                'action_enctype': 'multipart/form-data',
+                'action_button': action_button,
+                'table': table,
+                'target': web.form.Dropdown('target', target),
+                'message': smsgq(SKT_M_COPY),
+                'hint': _['h_copy'],
+            }
+        #
+        content = ''
+        #
+        stop()
+        return T(data, content)
+
+    def POST(self):
+        inp = web.input(table='', target='')
+        table = inp.table.lower().strip()
+        target = inp.target.lower().strip()
+        #
+        if not table or not target:
+            dflt()
+        #
+        if target == table:
+            dflt()
+        #
+        if target in COPY_TARGET_EXCLUDE:
+            dflt()
+        #        
+        oldtables = tables()
+        oldtables = [x.lower() for x in oldtables]
+        if not table in oldtables or not target in oldtables:
+            dflt()
+        #
+        scols = columns(table)
+        tcols = columns(target)
+        if not scols or not tcols:
+            dflt()
+        #
+        sdcols = {}
+        tdcols = {}
+        sall = (
+                (
+                    scols,
+                    sdcols, 
+                ),
+                (
+                    tcols,
+                    tdcols,
+                ),
+            )
+        for a in sall:
+            s = a[0]
+            d = a[1]
+            #
+            for c in s:
+                cname = c.get('name').lower()
+                ctype = c.get('type').lower()
+                if cname and ctype:
+                    d[cname] = ctype
+        #
+        ncols = []
+        for d in tdcols.keys():
+            if sdcols.has_key(d):
+                sd = sdcols.get(d)
+                td = tdcols.get(d)
+                if sd and td:
+                    if sd == td:
+                        ncols.append(d)
+        #
+        ncols = [x for x in ncols if validfname(x)]
+        ncols.sort()
+        #
+        msg = [
+                [
+                    _['x_column'],
+                    ','.join(ncols), 
+                ]
+            ]
+        #
+        try:
+            if not ncols:
+                raise Exception, _['x_copy_columns_none']
+            #
+            q = '''
+                insert into %s (%s) select %s from %s
+                ''' %(
+                        target,
+                        ','.join(ncols),
+                        ','.join(ncols),
+                        table,
+                    )
+            r = db.query(q)
+            msg.append(
+                        [
+                            _['o_copy'],
+                            target,
+                            _['x_row'],
+                            str(r),
+                        ]
+            )
+
+        except Exception, e:
+            msg.append(
+                        [
+                            _['e_copy'],
+                            str(e),
+                        ]
+            )
+        #
+        sess[SKT_M_COPY] = msg
+        #
+        raise web.seeother('/table/copy?table=' + table)
+
+
+class table_empty:
+    def GET(self):
+        start()
+        #
+        table = web.input(table='').table
+        table = str(table)
+        table = table.lower().strip()
+        #
+        if not table in tables(): 
+            dflt()
+        #
+        if table in EMPTY_EXCLUDE:
+            dflt()
+        #
+        data = {
+            'title': '%s - %s' %(table, _['tt_empty']),
+            'command': 'empty',
+            'table': table,
+            'hidden': (('table', table), ('confirm', '1')),
+            'action_url': '/table/empty',
+            'action_method': 'post',
+            'action_button': (
+                                ('empty', _['cf_empty'], False, '', 'submit'),
+                            ),
+            'message': smsg(table, SKT_M_EMPTY),
+            'hint': _['h_empty'],
+        }
+        #
+        content = ''
+        #
+        stop()
+        return T(data, content)
+        
+    def POST(self):
+        input = web.input(table='', confirm='')
+        table = input.table.lower().strip()
+        confirm = input.confirm.strip()
+        if not table in tables() or not confirm: 
+            dflt()
+        #
+        if table in EMPTY_EXCLUDE:
+            dflt()
+        #
+        msg = []
+        #
+        q = 'delete from %s' %(table)
+        try:
+            r = db.query(q)
+            msg = [
+                    [
+                        _['o_empty'],
+                        str(r),
+                    ]
+                ]
+        except Exception, e:
+            msg = [
+                    [
+                        _['e_empty'],
+                        str(e),
+                    ]
+                ]
+        #
+        sess.table[table][SKT_M_EMPTY] = msg
+        #
+        redir = '/table/empty?table=%s' %(table)
+        raise web.seeother(redir)
+
+
+class vacuum:
+    def GET(self):
+        start()
+        #
+        data = {
+            'title': '%s' %(_['tt_vacuum']),
+            'command': 'vacuum',
+            'hidden': (('confirm', '1'),),
+            'action_url': '/vacuum',
+            'action_method': 'post',
+            'action_button': (
+                                ('vacuum', _['cf_vacuum'], False, '', 'submit'),
+                            ),
+            'message': smsgq(SKV),
+            'info': [
+                        [
+                            _['x_database_size'],
+                            size(),
+                        ],
+                        [
+                            _['x_unused_pages'],
+                            p_pragma(
+                                PRAGMA_FREELIST_COUNT, 
+                                default=DEFAULT_ERROR_INT
+                            ),
+                        ],
+                    ],
+            'hint': _['h_vacuum'],
+        }
+        #
+        content = ''
+        #
+        stop()
+        return T(data, content)
+    
+    def POST(self):
+        inp = web.input(confirm='')
+        confirm = inp.confirm.strip()
+        #
+        if not confirm:
+            dflt()
+        #
+        msg = []
+        #
+        q = 'vacuum'
+        try:
+            r = db.query(q)
+            msg = [
+                    [
+                        _['o_vacuum'],
+                    ]
+                ]
+        except Exception, e:
+            msg = [
+                    [
+                        _['th_error'],
+                        str(e),
+                    ]
+                ]
+        #
+        sess[SKV] = msg
+        #
+        raise web.seeother('/vacuum')
+
+
+class form_shortcut:
+    def GET(self, form):
+        start()
+        #
+        form = form.strip().lower()
+        if not form or not form in forms():
+            dflt()
+        #
+        if not canform(FORM_KEY_SECURITY_RUN, form):
+            dflt()
+        #
+        if not validfname(form):
+            dflt()
+        #
+        res = shortcut(SHORTCUT_TYPE_FORM, form)
+        #
+        data = {
+                }
+        content = ''
+        #
+        stop()
+        #
+        if not res:
+            dflt()
+        else:
+            raise web.seeother('/?form=%s' %(form))
+
+
+class report_shortcut:
+    def GET(self, report):
+        start()
+        #
+        report = report.strip().lower()
+        if not report or not report in reports():
+            dflt()
+        #
+        if not canreport(REPORT_KEY_SECURITY_RUN, report):
+            dflt()
+        #
+        if not validfname(report):
+            dflt()
+        #
+        res = shortcut(SHORTCUT_TYPE_REPORT, report)
+        #
+        data = {
+                }
+        content = ''
+        #
+        stop()
+        #
+        if not res:
+            dflt()
+        else:
+            raise web.seeother('/?report=%s' %(report))
+
+
+class table_import_csv:
+    def GET(self):
+        start()
+        #
+        table = web.input(table='').table
+        table = str(table)
+        table = table.strip().lower()
+        #
+        if not table in tables(): 
+            dflt()
+        #
+        if table in IMPORT_EXCLUDE:
+            dflt()
+        #
+        data = {
+            'title': '%s - %s' %(table, _['tt_import_csv']),
+            'command': 'import',
+            'table': table,
+            'hidden': (('table', table),),
+            'action_enctype': 'multipart/form-data',
+            'action_url': '/table/import/csv',
+            'action_method': 'post',
+            'action_button': (
+                                ('import', _['cmd_import_csv'], False, '', 'submit'),
+                            ),
+            'message': smsg(table, SKT_M_IMPORT),
+            'hint': _['h_import_csv'],
+        }
+        #
+        content = ''
+        #
+        stop()
+        return T(data, content)
+        
+    def POST(self):
+        inp = web.input(table='', f={})
+        table = inp.table.strip().lower()
+        f = inp.f
+        #
+        redir = '/table/import/csv?table=%s' %(table)        
+        #
+        if not table in tables(): 
+            dflt()
+        #
+        if table in IMPORT_EXCLUDE:
+            dflt()
+        #
+        try:
+            if not f.value.strip():
+                raise Exception
+        except:
+            raise web.seeother(redir)
+        #
+        cols = columns(table, True)
+        if not cols:
+            dflt()
+        #
+        msg = []
+        counter = 0
+        #
+        x1 = ','.join(cols)
+        c2 = ['$'+x for x in cols]
+        x2 = ','.join(c2)
+        #
+        t = db.transaction()
+        try:
+            reader = csv.DictReader(f.file)
+            for i in reader:
+                if reader.line_num == 1: #header:
+                    continue
+                #
+                i2 = {}
+                for k in i.keys():
+                    if isstr(k):
+                        i2[k.lower()] = i.get(k)
+                #
+                v = {}
+                for k in cols:
+                    if not i2.has_key(k):
+                        continue
+                    v[k] = i2.get(k)
+                #
+                if not v.keys():
+                    continue
+                #
+                for k in cols:
+                    if not v.has_key(k):
+                        v[k] = None
+                #
+                q = 'insert into %s(%s) values(%s)' %(
+                        table,
+                        x1,
+                        x2
+                    )
+                r = db.query(q, vars=v)
+                if r:
+                    counter += 1
+            #
+            t.commit()
+            #
+            msg = [
+                    [
+                        _['o_import_csv'],
+                        _['x_row'],
+                        str(counter),
+                    ]
+                ]            
+        except Exception, e:
+            t.rollback()
+            msg = [
+                    [
+                        _['e_import_csv'],
+                        str(e),
+                    ]
+                ]            
+        #
+        sess.table[table][SKT_M_IMPORT] = msg
+        #
+        raise web.seeother(redir)        
+
+
+class profile:
+    def GET(self):
+        start()
+        #
+        data = {
+            'title': '%s' %(_['tt_profile']),
+            'command': 'profile',
+            'action_enctype': 'multipart/form-data',
+            'action_url': '/profile',
+            'action_method': 'post',
+            'action_button': (
+                                ('save', _['cmd_save'], False, '', 'submit'),
+                            ),
+            'message': smsgq(SK_PROFILE),
+            'hint': _['h_profile'],
+        }
+        #
+        content = [
+                    pr_all(),
+                ]
+        #
+        stop()
+        return T(data, content)
+        
+    def POST(self):
+        inp = web.input()
+        #
+        msg = []
+        p = {}
+        #
+        a = pr_all()
+        for i in a:
+            name = i[0]
+            func = i[6]
+            if inp.has_key(name):
+                value = inp.get(name)  
+                try:
+                    value = func(value)
+                except:
+                    pass
+                p[name] = value
+        #
+        try:
+            p = json.dumps(p)
+            r = db.update(FORM_TBL, g=p, 
+                    where='a=$a and b=$b and d=$d',
+                    vars={
+                        'a': 'user',
+                        'b': 'account',
+                        'd': user(),
+                    }
+                )
+            msg = [
+                    [
+                        _['o_profile'],
+                    ]
+                ]                        
+        except:
+            msg = [
+                    [
+                        _['e_profile'],
+                    ]
+                ]                        
+        #
+        sess[SK_PROFILE] = msg
+        #
+        raise web.seeother('/profile')
+
+
+class table_schema:
+    def GET(self):
+        start()
+        #
+        table = web.input(table='').table
+        if not table in tables(): 
+            dflt()
+        #
+        target = web.input(target='').target
+        #
+        data = {
+                'title': '%s - %s' %(table, _['tt_schema']),
+                'command': 'schema',
+                'action_url': '/table/schema',
+                'action_method': 'post',
+                'action_enctype': 'multipart/form-data',
+                'action_button': (
+                                    ('create', _['cmd_table_create'], False, '', 'submit'),
+                                ),
+                'table': table,
+                'target': target,
+                'message': smsgq(SK_SCHEMA),
+                'hint': _['h_create'],
+            }
+        #
+        content = r_schema(table)
+        #
+        stop()
+        return T(data, content)
+
+    def POST(self):
+        inp = web.input(table='', target='')
+        table = inp.table.strip().lower()
+        target = inp.target.strip().lower()
+        #
+        if not table:
+            dflt()
+        #
+        oldtables = tables()
+        oldtables = [x.lower() for x in oldtables]
+        if not table in oldtables:
+            dflt()
+        #
+        redir = '/table/schema?table=%s&target=%s' %(table, target)
+        #
+        if not target:
+            raise web.seeother(redir)
+        #
+        if target == table or target in oldtables:
+            sess[SK_SCHEMA] = [
+                                [
+                                    _['e_table_exists'],
+                                ],
+                            ]
+            raise web.seeother(redir)
+        #
+        if hasws(target):
+            sess[SK_SCHEMA] = [
+                                [
+                                    _['z_table_whitespace'],
+                                ],
+                            ]
+            raise web.seeother(redir)
+        #
+        schema = str(r_schema(table))
+        x = schema.find('(')
+        if x < 0:
+            raise web.seeother(redir)
+        #
+        cols = schema[x:]
+        q = 'create table %s %s' %(target, cols)
+        try:
+            r = db.query(q)
+        except Exception, e:
+            sess[SK_SCHEMA] = [
+                                [
+                                    _['th_error'],
+                                    str(e),
+                                ],
+                            ]
+            raise web.seeother(redir)
+        else:
+            raise web.seeother('/table/browse/%s' %(target))
+        #
+        dflt()
         
 
 #----------------------------------------------------------------------#
@@ -6134,6 +11487,44 @@ if __name__ == '__main__':
     except:
         port = DEFAULT_PORT
     #
+    #server command check
+    scmd_ret = 0
+    try:
+        scmd = sys.argv[3].split(SERVER_COMMAND_SEPARATOR)
+        if not scmd:
+            raise Exception
+        #
+        scmd = [x.lower() for x in scmd if x.strip()]
+        scmd0 = scmd[0]
+        if not scmd0 in SERVER_COMMAND_ALL.keys():
+            raise Exception
+        #
+        sfuncn = SERVER_COMMAND_ALL.get(scmd0)
+        sfunc = globals().get(sfuncn)
+        if not callable(sfunc):
+            raise Exception
+        #
+        log(_['x_server_command_mode'])
+        log(_['x_please_wait'])
+        log(scmd0)
+        sret = sfunc(scmd)
+        #
+        if sret:
+            log(sret)
+            scmd_ret = 3
+        else:
+            scmd_ret = 4
+    except:
+        pass
+    #
+    if scmd_ret:
+        sys.exit(scmd_ret)
+    #
+    if c_db_static(dbfile):
+        log(dbfile, stream=sys.stderr)
+        log(_['e_db_static'], stream=sys.stderr)
+        sys.exit(5)
+    #
     try:
         db = web.database(
                 dbn=DBN, 
@@ -6149,6 +11540,7 @@ if __name__ == '__main__':
     #
     app = web.application(URLS, globals())
     app.notfound = notfound
+    app.internalerror = internalerror
     #
     sess = web.session.Session(app, MemSession(), initializer = sess_init)
     prepsess()
@@ -6158,7 +11550,37 @@ if __name__ == '__main__':
     app.add_processor(proc_login)
     app.add_processor(proc_nosb)
     app.add_processor(proc_udf)
+    app.add_processor(proc_account_check)
     app.add_processor(proc_misc)
     #
-    web.httpserver.runsimple(app.wsgifunc(), (DEFAULT_ADDR, port))
+    xupdate_all = [
+                        [
+                            s_isold,
+                            _['x_sqliteboy_x_update'],
+                            s_xupdate,
+                        ],
+                    ]
+    for x in xupdate_all:
+        if x[0]():
+            log('')
+            log(x[1])
+            xupdate = x[2]()
+            if xupdate:
+                log('%s: %s %s' %(
+                    _['th_ok'],
+                    str(xupdate),
+                    _['x_row'],
+                    )
+                )
+            else:
+                log(_['th_error'])
+            log('')
+    #
+    try:
+        web.httpserver.runsimple(app.wsgifunc(), (DEFAULT_ADDR, port))
+    except Exception, e:
+        emsg = '%s: %s' %(_['th_error'], e)
+        log('', stream=sys.stderr)
+        log(emsg, stream=sys.stderr)
+        sys.exit(GENERAL_ERROR_CODE)
     
